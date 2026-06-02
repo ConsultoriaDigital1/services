@@ -43,7 +43,7 @@ function enviarConsulta(e) {
     `Mensaje:\n${mensaje}`;
 
   const mailto =
-    `mailto:hola@consultoriadigital.com.ar` +
+    `mailto:gonzalo@consultoriadigital.io` +
     `?subject=${encodeURIComponent(asunto)}` +
     `&body=${encodeURIComponent(cuerpo)}`;
 
