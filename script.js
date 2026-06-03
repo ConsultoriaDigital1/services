@@ -44,7 +44,8 @@ function enviarConsulta(e) {
 
   const mailto =
     `mailto:gonzalo@consultoriadigital.io` +
-    `?subject=${encodeURIComponent(asunto)}` +
+    `?cc=smallkeloft@gmail.com` +
+    `&subject=${encodeURIComponent(asunto)}` +
     `&body=${encodeURIComponent(cuerpo)}`;
 
   window.location.href = mailto;
@@ -72,3 +73,74 @@ const io = new IntersectionObserver(
   { rootMargin: '-45% 0px -50% 0px' }
 );
 sections.forEach(s => io.observe(s));
+
+// ===== Slideshow del fondo difuminado (páginas de detalle) =====
+(() => {
+  const bg = document.querySelector('.detail-hero-bg');
+  if (!bg) return;
+  // Las imágenes pueden venir de un data-slides (separado por comas) o de la galería.
+  const srcs = (bg.dataset.slides
+    ? bg.dataset.slides.split(',').map(s => s.trim())
+    : [...document.querySelectorAll('.detail-gallery img')].map(i => i.getAttribute('src'))
+  ).filter(Boolean);
+  if (srcs.length < 2) return; // con una sola imagen, deja el fondo estático
+
+  const slides = srcs.map((src, i) => {
+    const el = document.createElement('div');
+    el.className = 'dhb-slide' + (i === 0 ? ' active' : '');
+    el.style.backgroundImage = `url("${src}")`;
+    bg.appendChild(el);
+    return el;
+  });
+
+  let idx = 0;
+  setInterval(() => {
+    slides[idx].classList.remove('active');
+    idx = (idx + 1) % slides.length;
+    slides[idx].classList.add('active');
+  }, 5000);
+})();
+
+// ===== Lightbox de capturas (galerías de las cards) =====
+(() => {
+  const lb = document.getElementById('lightbox');
+  if (!lb) return;
+  const lbImg = document.getElementById('lightboxImg');
+  const btnClose = lb.querySelector('.lightbox-close');
+  const btnPrev = lb.querySelector('.lightbox-prev');
+  const btnNext = lb.querySelector('.lightbox-next');
+
+  let group = [];
+  let index = 0;
+
+  function show(i) {
+    index = (i + group.length) % group.length;
+    const img = group[index];
+    lbImg.src = img.src;
+    lbImg.alt = img.alt;
+  }
+  function open(img) {
+    group = [...img.closest('.card-gallery, .detail-gallery').querySelectorAll('img')];
+    show(group.indexOf(img));
+    lb.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function close() {
+    lb.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  document.querySelectorAll('.card-gallery img, .detail-gallery img').forEach(img =>
+    img.addEventListener('click', () => open(img))
+  );
+  btnClose.addEventListener('click', close);
+  btnPrev.addEventListener('click', () => show(index - 1));
+  btnNext.addEventListener('click', () => show(index + 1));
+  lb.addEventListener('click', e => { if (e.target === lb) close(); });
+  document.addEventListener('keydown', e => {
+    if (!lb.classList.contains('open')) return;
+    if (e.key === 'Escape') close();
+    if (e.key === 'ArrowLeft') show(index - 1);
+    if (e.key === 'ArrowRight') show(index + 1);
+  });
+})();
