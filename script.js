@@ -27,32 +27,36 @@ function syncHeader() {
 window.addEventListener('scroll', syncHeader, { passive: true });
 
 // Formulario de contacto (demo: abre el cliente de correo con los datos)
-function enviarConsulta(e) {
+async function enviarConsulta(e) {
   e.preventDefault();
   const f = e.target;
-  const nombre = f.nombre.value.trim();
-  const contacto = f.contacto.value.trim();
-  const servicio = f.servicio.value;
-  const mensaje = f.mensaje.value.trim();
-
-  const asunto = `Consulta web — ${servicio}`;
-  const cuerpo =
-    `Nombre/Empresa: ${nombre}\n` +
-    `Contacto: ${contacto}\n` +
-    `Servicio de interés: ${servicio}\n\n` +
-    `Mensaje:\n${mensaje}`;
-
-  const mailto =
-    `mailto:gonzalo@consultoriadigital.io` +
-    `?cc=smallkeloft@gmail.com` +
-    `&subject=${encodeURIComponent(asunto)}` +
-    `&body=${encodeURIComponent(cuerpo)}`;
-
-  window.location.href = mailto;
-
   const hint = document.getElementById('formHint');
-  hint.textContent = '¡Gracias! Abrimos tu correo para enviar la consulta.';
-  f.reset();
+  const btn = f.querySelector('button[type="submit"]');
+
+  const data = new FormData(f);
+  data.append('_subject', `Consulta web — ${f.servicio.value}`);
+  data.append('_cc', 'smallkeloft@gmail.com');   // copia al segundo correo
+  data.append('_template', 'table');             // email prolijo en formato tabla
+  data.append('_captcha', 'false');
+
+  btn.disabled = true;
+  hint.textContent = 'Enviando…';
+
+  try {
+    const res = await fetch('https://formsubmit.co/ajax/gonzalo@consultoriadigital.io', {
+      method: 'POST',
+      headers: { 'Accept': 'application/json' },
+      body: data,
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    hint.textContent = '¡Gracias! Recibimos tu consulta y te respondemos a la brevedad.';
+    f.reset();
+  } catch (err) {
+    hint.textContent =
+      'No pudimos enviar la consulta. Escribinos a gonzalo@consultoriadigital.io o por WhatsApp.';
+  } finally {
+    btn.disabled = false;
+  }
   return false;
 }
 
