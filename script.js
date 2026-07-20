@@ -1,7 +1,6 @@
 // ===== Consultoría Digital — interacciones =====
 
-// Año dinámico en el footer
-document.getElementById('year').textContent = new Date().getFullYear();
+// El año del footer lo resuelve i18n.js al traducir la clave footer.copy.
 
 // Menú móvil
 const toggle = document.querySelector('.nav-toggle');
@@ -34,13 +33,13 @@ async function enviarConsulta(e) {
   const btn = f.querySelector('button[type="submit"]');
 
   const data = new FormData(f);
-  data.append('_subject', `Consulta web — ${f.servicio.value}`);
+  data.append('_subject', `${t('form.subject')} — ${f.servicio.value}`);
   data.append('_cc', 'smallkeloft@gmail.com');   // copia al segundo correo
   data.append('_template', 'table');             // email prolijo en formato tabla
   data.append('_captcha', 'false');
 
   btn.disabled = true;
-  hint.textContent = 'Enviando…';
+  hint.textContent = t('form.enviando');
 
   try {
     const res = await fetch('https://formsubmit.co/ajax/gonzalo@consultoriadigital.io', {
@@ -49,11 +48,10 @@ async function enviarConsulta(e) {
       body: data,
     });
     if (!res.ok) throw new Error('HTTP ' + res.status);
-    hint.textContent = '¡Gracias! Recibimos tu consulta y te respondemos a la brevedad.';
+    hint.textContent = t('form.ok');
     f.reset();
   } catch (err) {
-    hint.textContent =
-      'No pudimos enviar la consulta. Escribinos a gonzalo@consultoriadigital.io o por WhatsApp.';
+    hint.textContent = t('form.error');
   } finally {
     btn.disabled = false;
   }
