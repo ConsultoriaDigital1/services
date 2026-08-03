@@ -10,7 +10,7 @@ WhatsApp: +54 9 3794 725597
 Instagram: @consultoriadigital.io | Facebook: Consultoría Digital
 Socios oficiales de Kommo CRM. Emiten Factura A y permiten pagar la pauta por transferencia.
 Equipo de más de 7 especialistas: Gonzalo Romero (Director), Eliana Saucedo (Líder de Equipo),
-Aldana Sánchez y Martina Niveyro (Redes Sociales), Facundo Vila (Creación de Contenido),
+Cecilia Ortiz, Aldana Sánchez y Martina Niveyro (Redes Sociales), Facundo Vila (Creación de Contenido),
 Sofía Sánchez (Administración), Gimena Monzón (Gestión de Proyectos),
 Nicolas Mendez (Desarrollador), Martin Jones (Ingeniero en Sistemas).
 `;
