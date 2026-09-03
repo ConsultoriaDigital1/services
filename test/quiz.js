@@ -149,6 +149,7 @@ let actual = 0;
 let datos = null;
 let diag = null;
 let registroPromesa = null;   // resuelve con el id que devuelve el backend
+let avance = null;            // timeout de avance entre preguntas
 
 /* ---------- Atajos al DOM ---------- */
 
@@ -200,14 +201,23 @@ function elegir(i) {
   btns.forEach(b => b.classList.remove('elegida'));
   btns[i].classList.add('elegida');
 
-  // Pequeña pausa para que se vea la selección antes de avanzar.
-  setTimeout(() => {
+  // Pequeña pausa para que se vea la selección antes de avanzar. Se cancela la anterior:
+  // sin esto, dos toques seguidos encolaban dos avances y salteaban una pregunta entera.
+  clearTimeout(avance);
+  avance = setTimeout(() => {
     if (actual < PREGUNTAS.length - 1) {
       actual++;
       pintarPregunta();
-    } else {
-      mostrar('datos');
+      return;
     }
+    // Nunca cerramos el test con huecos: el cálculo necesita las 8 respuestas.
+    const falta = respuestas.indexOf(null);
+    if (falta !== -1) {
+      actual = falta;
+      pintarPregunta();
+      return;
+    }
+    mostrar('datos');
   }, 220);
 }
 
@@ -520,6 +530,16 @@ $('#form-datos').addEventListener('submit', e => {
     return;
   }
   error.hidden = true;
+
+  // Red de seguridad: antes reventaba el cálculo y se perdía el lead entero.
+  // El formulario conserva lo cargado, así que vuelven acá y siguen.
+  const falta = respuestas.indexOf(null);
+  if (falta !== -1) {
+    actual = falta;
+    mostrar('preguntas');
+    pintarPregunta();
+    return;
+  }
 
   const btn = $('#btn-ver');
   btn.disabled = true;
