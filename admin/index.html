@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex,nofollow" />
+  <title>Panel — Consultoría Digital</title>
+  <link rel="icon" type="image/png" href="/assets/favicon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="/admin/admin.css" />
+</head>
+<body class="adm-body">
+
+  <!-- ===== Login ===== -->
+  <section class="adm-login" id="pantalla-login" hidden>
+    <form class="adm-login-card" id="form-login" novalidate>
+      <img src="/assets/logo-cd.webp" alt="Consultoría Digital" width="190" height="40" />
+      <h1>Panel interno</h1>
+      <p class="adm-login-p">Resultados del test de automatización.</p>
+      <label>
+        <span>Contraseña</span>
+        <input type="password" id="password" autocomplete="current-password" required />
+      </label>
+      <p class="adm-error" id="error-login" hidden></p>
+      <button type="submit" class="btn btn-block" id="btn-entrar">Entrar</button>
+    </form>
+  </section>
+
+  <!-- ===== Panel ===== -->
+  <div id="pantalla-panel" hidden>
+
+    <header class="adm-header">
+      <a class="adm-brand" href="/" aria-label="Consultoría Digital — inicio">
+        <img src="/assets/logo-cd.webp" alt="Consultoría Digital" width="150" height="32" />
+      </a>
+      <div class="adm-header-acciones">
+        <button type="button" class="adm-btn" id="btn-actualizar">Actualizar</button>
+        <button type="button" class="adm-btn" id="btn-csv">Exportar CSV</button>
+        <button type="button" class="adm-btn adm-btn-salir" id="btn-salir">Salir</button>
+      </div>
+    </header>
+
+    <main class="adm-main">
+      <h1 class="adm-titulo">Tests de automatización</h1>
+
+      <div class="adm-kpis" id="kpis"></div>
+
+      <div class="adm-filtros">
+        <input type="search" id="buscar" placeholder="Buscar por nombre, empresa o email…" aria-label="Buscar" />
+        <select id="filtro-nivel" aria-label="Filtrar por nivel">
+          <option value="">Todos los niveles</option>
+        </select>
+        <select id="filtro-n8n" aria-label="Filtrar por estado del flujo">
+          <option value="">Todo el flujo n8n</option>
+          <option value="ok">Enviados a n8n</option>
+          <option value="error">Con error en n8n</option>
+          <option value="pendiente">Pendientes</option>
+        </select>
+        <span class="adm-conteo" id="conteo"></span>
+      </div>
+
+      <p class="adm-aviso" id="aviso" hidden></p>
+
+      <div class="adm-tabla-wrap">
+        <table class="adm-tabla">
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Nombre</th>
+              <th>Empresa</th>
+              <th>Contacto</th>
+              <th class="num">Score</th>
+              <th>Nivel</th>
+              <th class="num">h/mes</th>
+              <th class="num">Semanas</th>
+              <th class="num">Costo/mes</th>
+              <th>Prioridad</th>
+              <th>n8n</th>
+            </tr>
+          </thead>
+          <tbody id="filas"></tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+
+  <!-- ===== Detalle ===== -->
+  <div class="adm-velo" id="velo" hidden></div>
+  <aside class="adm-detalle" id="detalle" hidden aria-label="Detalle del test">
+    <button type="button" class="adm-cerrar" id="btn-cerrar" aria-label="Cerrar">✕</button>
+    <div id="detalle-cuerpo"></div>
+  </aside>
+
+  <script src="/admin/admin.js"></script>
+</body>
+</html>

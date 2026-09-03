@@ -5,9 +5,15 @@
 /* ---------- Constantes a revisar antes de cada evento ---------- */
 
 const VALOR_HORA = 8000;                     // ARS por hora de trabajo — ajustar según el público
+const HS_SEMANA = 40;                        // una semana de trabajo, para expresar la pérdida
 const WHATSAPP = '5493794725597';
 const FORMSUBMIT = 'https://formsubmit.co/ajax/gonzalo@consultoriadigital.io';
-const CHAT_API = window.CD_CHAT_API || 'https://api.consultoriadigital.io/api/chat';
+const API_BASE = window.CD_API || (
+  ['localhost', '127.0.0.1'].includes(location.hostname)
+    ? 'http://localhost:3060'
+    : 'https://api.consultoriadigital.io'
+);
+const CHAT_API = window.CD_CHAT_API || `${API_BASE}/api/chat`;
 const IA_TIMEOUT = 12000;
 
 /* ---------- Servicios ---------- */
@@ -142,6 +148,7 @@ const respuestas = new Array(PREGUNTAS.length).fill(null);
 let actual = 0;
 let datos = null;
 let diag = null;
+let registroPromesa = null;   // resuelve con el id que devuelve el backend
 
 /* ---------- Atajos al DOM ---------- */
 
@@ -227,13 +234,34 @@ function calcular() {
     .slice(0, 3)
     .map(([tag, hs]) => ({ tag, hs: Math.round(hs * 4.3), ...SERVICIOS[tag] }));
 
-  return { score, hsMes, costoMes: hsMes * VALOR_HORA, nivel, ops };
+  return {
+    score,
+    hsMes,
+    semanasMes: +(hsMes / HS_SEMANA).toFixed(1),
+    costoMes: hsMes * VALOR_HORA,
+    nivel,
+    ops,
+  };
 }
 
 function resumenRespuestas() {
   return respuestas
     .map((idx, qi) => `${qi + 1}. ${PREGUNTAS[qi].q} → ${PREGUNTAS[qi].o[idx].t}`)
     .join('\n');
+}
+
+// El mismo plan se pinta en pantalla y viaja al reporte: el PDF dice lo que la persona vio.
+function construirPlan(d) {
+  const primero = d.ops.length ? d.ops[0].nombre : 'tu proceso comercial';
+  const resto = d.ops.slice(1).map(o => o.nombre).join(' y ');
+
+  return [
+    { cuando: 'Semana 1 y 2', que: 'Relevamiento sin costo: nos sentamos con vos, miramos cómo trabajás hoy y ponemos números al ahorro real.' },
+    { cuando: 'Mes 1', que: `Implementamos ${primero}, que es lo que más horas te está comiendo. Lo dejamos andando y capacitamos a tu equipo.` },
+    { cuando: 'Mes 2 y 3', que: resto
+      ? `Sumamos ${resto} y conectamos todo, para que la información viaje sola de un lado al otro.`
+      : 'Conectamos las piezas que ya tenés y armamos los tableros para que decidas con datos, no con intuición.' },
+  ];
 }
 
 /* ---------- Lead a Formsubmit ---------- */
@@ -265,6 +293,64 @@ async function enviarLead() {
   }
 }
 
+/* ---------- Registro en el backend (panel /admin + flujo de n8n) ---------- */
+
+// El server guarda el test y después dispara n8n, que arma el PDF y lo manda por wasender.
+async function enviarTest() {
+  const cuerpo = {
+    contacto: datos,
+    resultado: {
+      score: diag.score,
+      nivel: diag.nivel.nombre,
+      nivelTxt: diag.nivel.txt,
+      horasMes: diag.hsMes,
+      semanasMes: diag.semanasMes,
+      costoMes: diag.costoMes,
+      costoMesTxt: pesos(diag.costoMes),
+      valorHora: VALOR_HORA,
+    },
+    oportunidades: diag.ops.map(o => ({ nombre: o.nombre, horasMes: o.hs, que: o.que, url: o.url })),
+    respuestas: respuestas.map((idx, qi) => ({
+      pregunta: PREGUNTAS[qi].q,
+      respuesta: PREGUNTAS[qi].o[idx].t,
+      puntos: PREGUNTAS[qi].o[idx].pts,
+      horasSemana: PREGUNTAS[qi].o[idx].hs,
+    })),
+    plan: construirPlan(diag),
+  };
+
+  try {
+    const res = await fetch(`${API_BASE}/api/test`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(cuerpo),
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    return (await res.json()).id;
+  } catch (err) {
+    console.warn('No se pudo registrar el test:', err.message);
+    return null;
+  }
+}
+
+// El server espera este aviso para disparar n8n con la lectura ya incluida.
+// Se manda igual cuando la IA falla (lectura null), así no espera al pedo.
+async function avisarLectura(lectura) {
+  const id = await registroPromesa;
+  if (!id) return;
+
+  try {
+    await fetch(`${API_BASE}/api/test/${id}/lectura`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ lectura }),
+      keepalive: true,
+    });
+  } catch (err) {
+    console.warn('No se pudo enviar la lectura:', err.message);
+  }
+}
+
 /* ---------- Lectura personalizada con IA ---------- */
 
 function promptDiagnostico() {
@@ -290,6 +376,7 @@ async function pedirLecturaIA() {
   const load = $('#ia-load');
   const ctrl = new AbortController();
   const reloj = setTimeout(() => ctrl.abort(), IA_TIMEOUT);
+  let lectura = null;
 
   try {
     const res = await fetch(CHAT_API, {
@@ -335,6 +422,7 @@ async function pedirLecturaIA() {
     }
 
     if (!txt.textContent.trim()) throw new Error('respuesta vacía');
+    lectura = txt.textContent.trim();
   } catch (err) {
     console.warn('Sin lectura de IA:', err.message);
     // El diagnóstico completo se muestra igual: la IA es un plus, no un requisito.
@@ -342,6 +430,8 @@ async function pedirLecturaIA() {
   } finally {
     clearTimeout(reloj);
     load.hidden = true;
+    // Un texto cortado a la mitad no sirve para el PDF: si falló, va null y n8n dispara igual.
+    avisarLectura(lectura);
   }
 }
 
@@ -355,8 +445,11 @@ function pintarResultado() {
 
   $('#horas').textContent = diag.hsMes;
   $('#plata').textContent = pesos(diag.costoMes);
+  const semanas = diag.semanasMes === 1
+    ? '1 semana de trabajo perdida'
+    : `${String(diag.semanasMes).replace('.', ',')} semanas de trabajo perdidas`;
   $('#perdida-fine').textContent =
-    `Estimado sobre tus respuestas, a ${pesos(VALOR_HORA)} la hora de trabajo. Son ${Math.round(diag.hsMes / 8)} jornadas completas por mes.`;
+    `Estimado sobre tus respuestas, a ${pesos(VALOR_HORA)} la hora de trabajo. Son ${semanas} por mes.`;
 
   const cont = $('#oportunidades');
   cont.innerHTML = '';
@@ -375,18 +468,9 @@ function pintarResultado() {
     cont.appendChild(a);
   });
 
-  const primero = diag.ops.length ? diag.ops[0].nombre : 'tu proceso comercial';
-  const resto = diag.ops.slice(1).map(o => o.nombre).join(' y ');
-  const plan = [
-    ['Semana 1 y 2', `Relevamiento sin costo: nos sentamos con vos, miramos cómo trabajás hoy y ponemos números al ahorro real.`],
-    ['Mes 1', `Implementamos ${primero}, que es lo que más horas te está comiendo. Lo dejamos andando y capacitamos a tu equipo.`],
-    ['Mes 2 y 3', resto
-      ? `Sumamos ${resto} y conectamos todo, para que la información viaje sola de un lado al otro.`
-      : `Conectamos las piezas que ya tenés y armamos los tableros para que decidas con datos, no con intuición.`],
-  ];
   const ol = $('#plan');
   ol.innerHTML = '';
-  plan.forEach(([cuando, que]) => {
+  construirPlan(diag).forEach(({ cuando, que }) => {
     const li = document.createElement('li');
     li.innerHTML = `<strong>${cuando}</strong><span>${que}</span>`;
     ol.appendChild(li);
@@ -442,7 +526,8 @@ $('#form-datos').addEventListener('submit', e => {
   btn.textContent = 'Preparando tu diagnóstico…';
 
   diag = calcular();
-  enviarLead();      // en paralelo: el resultado no espera al mail
+  enviarLead();                       // en paralelo: el resultado no espera al mail
+  registroPromesa = enviarTest();     // ni al registro en el backend
   pintarResultado();
   pedirLecturaIA();
 });

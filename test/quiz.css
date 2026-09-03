@@ -13,7 +13,8 @@
 
 /* ---------- Header ---------- */
 .quiz-header{padding:1.4rem 1.2rem .6rem;display:flex;justify-content:center}
-.quiz-brand img{height:32px;width:auto;opacity:.95}
+/* El .webp trae el wordmark centrado con mucho aire: se recorta igual que en el home. */
+.quiz-brand img{width:190px;height:40px;object-fit:cover;object-position:center}
 
 /* ---------- Layout ---------- */
 .quiz-main{width:min(620px,92%);margin-inline:auto;padding:1.2rem 0 4rem}
