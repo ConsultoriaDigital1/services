@@ -4,7 +4,7 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const { systemPrompt } = require('./knowledge');
+const { systemPrompt, diagnosticPrompt } = require('./knowledge');
 
 const PORT = process.env.PORT || 3060;
 const API_KEY = process.env.DEEPSEEK_API_KEY;
@@ -31,7 +31,8 @@ app.use(
 
 // ---- Límite de uso por IP (protege el crédito de la API) ----
 const WINDOW_MS = 60 * 60 * 1000; // 1 hora
-const MAX_REQUESTS = 40;
+// En eventos presenciales todos comparten la IP pública del WiFi: subir MAX_REQUESTS en el .env.
+const MAX_REQUESTS = Number(process.env.MAX_REQUESTS) || 40;
 const hits = new Map();
 
 function rateLimit(req, res, next) {
@@ -62,6 +63,7 @@ const MAX_CHARS = 1500;
 
 function sanitize(body) {
   const lang = ['es', 'en', 'pt'].includes(body.lang) ? body.lang : 'es';
+  const mode = body.mode === 'diagnostico' ? 'diagnostico' : 'chat';
   const messages = Array.isArray(body.messages) ? body.messages : [];
 
   const clean = messages
@@ -69,14 +71,17 @@ function sanitize(body) {
     .slice(-MAX_TURNS)
     .map(m => ({ role: m.role, content: m.content.slice(0, MAX_CHARS) }));
 
-  return { lang, messages: clean };
+  return { lang, mode, messages: clean };
 }
 
 app.get('/api/health', (_req, res) => res.json({ ok: true, model: MODEL }));
 
 app.post('/api/chat', rateLimit, async (req, res) => {
-  const { lang, messages } = sanitize(req.body || {});
+  const { lang, mode, messages } = sanitize(req.body || {});
   if (!messages.length) return res.status(400).json({ error: 'sin_mensajes' });
+
+  // El test de automatización (/test) usa otro rol: devuelve un diagnóstico, no conversa.
+  const system = mode === 'diagnostico' ? diagnosticPrompt(lang) : systemPrompt(lang);
 
   const controller = new AbortController();
   req.on('close', () => controller.abort());
@@ -95,7 +100,7 @@ app.post('/api/chat', rateLimit, async (req, res) => {
         stream: true,
         temperature: 0.6,
         max_tokens: 700,
-        messages: [{ role: 'system', content: systemPrompt(lang) }, ...messages],
+        messages: [{ role: 'system', content: system }, ...messages],
       }),
     });
   } catch (err) {

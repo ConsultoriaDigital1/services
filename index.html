@@ -323,8 +323,11 @@
         <label><span data-i18n="form.nombre">Nombre</span>
           <input type="text" name="nombre" required data-i18n-placeholder="form.nombrePh" placeholder="Tu nombre o empresa" />
         </label>
-        <label><span data-i18n="form.contacto">Email o WhatsApp</span>
-          <input type="text" name="contacto" required data-i18n-placeholder="form.contactoPh" placeholder="Para responderte" />
+        <label><span data-i18n="form.email">Email</span>
+          <input type="email" name="email" required data-i18n-placeholder="form.emailPh" placeholder="tunombre@empresa.com" />
+        </label>
+        <label><span data-i18n="form.telefono">Teléfono / WhatsApp</span>
+          <input type="tel" name="telefono" required inputmode="tel" data-i18n-placeholder="form.telefonoPh" placeholder="+54 9 379 400-0000" />
         </label>
         <label><span data-i18n="form.interes">¿Qué te interesa?</span>
           <select name="servicio">
@@ -333,6 +336,8 @@
             <option data-i18n="form.op3">Automatización con CRM</option>
             <option data-i18n="form.op4">ConciliA (Conciliación con IA)</option>
             <option data-i18n="form.op5">TurnerIA (Turnos con IA)</option>
+            <option data-i18n="form.op7">Software a medida</option>
+            <option data-i18n="form.op8">Gestoría (ERP)</option>
             <option data-i18n="form.op6">No estoy seguro / Otro</option>
           </select>
         </label>

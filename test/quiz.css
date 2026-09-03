@@ -1,0 +1,195 @@
+/* ===== Test de automatización (/test) — página oculta para eventos ===== */
+/* Hereda tipografías, variables y .btn de /styles.css; acá solo el tema oscuro. */
+
+.quiz-body{
+  background:
+    radial-gradient(900px 520px at 50% -10%, rgba(197,237,27,.16), transparent 60%),
+    linear-gradient(180deg,#0c1015 0%,#080b0f 100%);
+  background-attachment:fixed;
+  color:#e8ebe3;
+  min-height:100vh;
+}
+.quiz-body h1,.quiz-body h2,.quiz-body h3{color:#fff}
+
+/* ---------- Header ---------- */
+.quiz-header{padding:1.4rem 1.2rem .6rem;display:flex;justify-content:center}
+.quiz-brand img{height:32px;width:auto;opacity:.95}
+
+/* ---------- Layout ---------- */
+.quiz-main{width:min(620px,92%);margin-inline:auto;padding:1.2rem 0 4rem}
+.quiz-screen{animation:quiz-in .35s ease both}
+@keyframes quiz-in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){
+  .quiz-screen{animation:none}
+}
+
+.quiz-eyebrow{
+  display:inline-block;font-family:'Poppins',sans-serif;font-weight:600;font-size:.75rem;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--lime);margin-bottom:.9rem;
+}
+.quiz-screen h1{font-size:clamp(1.9rem,6.5vw,2.7rem);letter-spacing:-.02em}
+.quiz-screen h2{font-size:clamp(1.5rem,5vw,2rem);letter-spacing:-.02em}
+.quiz-lead{color:#aab2a2;margin-top:1rem;font-size:1.03rem}
+.quiz-fineprint{color:#79806f;font-size:.82rem;margin-top:.9rem;text-align:center}
+
+.quiz-meta{list-style:none;display:flex;gap:1.6rem;margin:1.6rem 0 1.8rem;flex-wrap:wrap}
+.quiz-meta li{color:#aab2a2;font-size:.9rem}
+.quiz-meta strong{
+  display:block;font-family:'Poppins',sans-serif;font-size:1.5rem;color:var(--lime);line-height:1.1;
+}
+
+/* ---------- Preguntas ---------- */
+.quiz-progress{
+  height:5px;border-radius:999px;background:rgba(255,255,255,.1);overflow:hidden;margin-top:.6rem;
+}
+.quiz-progress-bar{
+  display:block;height:100%;width:var(--pct,0%);background:var(--grad);
+  border-radius:999px;transition:width .3s ease;
+}
+.quiz-step{
+  font-family:'Poppins',sans-serif;font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;
+  color:#79806f;margin:1.2rem 0 .5rem;
+}
+.quiz-q{font-size:clamp(1.35rem,4.8vw,1.8rem);letter-spacing:-.01em}
+.quiz-q small{
+  display:block;font-family:'Inter',sans-serif;font-weight:400;font-size:.92rem;
+  color:#8f978a;margin-top:.5rem;line-height:1.5;
+}
+
+.quiz-options{display:grid;gap:.7rem;margin-top:1.6rem}
+.quiz-option{
+  width:100%;text-align:left;cursor:pointer;
+  font-family:'Inter',sans-serif;font-size:1rem;color:#e8ebe3;
+  background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.12);
+  border-radius:14px;padding:1rem 1.1rem;line-height:1.4;
+  transition:border-color .18s ease,background .18s ease,transform .18s ease;
+}
+.quiz-option:hover{border-color:rgba(197,237,27,.55);background:rgba(197,237,27,.08)}
+.quiz-option.elegida{
+  border-color:var(--lime);background:rgba(197,237,27,.16);color:#fff;transform:translateY(-1px);
+}
+.quiz-back{
+  margin-top:1.6rem;background:none;border:0;cursor:pointer;
+  color:#79806f;font-family:'Inter',sans-serif;font-size:.9rem;padding:.4rem 0;
+}
+.quiz-back:hover{color:var(--lime)}
+
+/* ---------- Formulario ---------- */
+.quiz-form{display:grid;gap:.9rem;margin-top:1.8rem}
+.quiz-form label{display:grid;gap:.4rem}
+.quiz-form span{font-size:.85rem;color:#aab2a2;font-weight:500}
+.quiz-form input{
+  font-family:'Inter',sans-serif;font-size:1rem;color:#fff;
+  background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.14);
+  border-radius:12px;padding:.85rem 1rem;transition:border-color .18s ease;
+}
+.quiz-form input::placeholder{color:#6b7264}
+.quiz-form input:focus{outline:none;border-color:var(--lime)}
+.quiz-error{color:#ffb4a2;font-size:.88rem}
+#btn-ver[disabled]{opacity:.6;cursor:default}
+
+/* ---------- Resultado ---------- */
+.res-score{text-align:center;padding:1rem 0 .5rem}
+.res-gauge{
+  --score:0;
+  width:170px;height:170px;margin:0 auto 1.2rem;border-radius:50%;
+  display:grid;place-content:center;
+  background:
+    conic-gradient(var(--lime) calc(var(--score) * 1%), rgba(255,255,255,.09) 0),
+    #0c1015;
+  position:relative;
+}
+.res-gauge::before{
+  content:'';position:absolute;inset:12px;border-radius:50%;background:#0f141a;
+}
+.res-gauge span,.res-gauge small{position:relative;z-index:1;text-align:center}
+.res-gauge span{
+  display:block;font-family:'Poppins',sans-serif;font-weight:800;font-size:3rem;
+  color:#fff;line-height:1;
+}
+.res-gauge small{display:block;color:#79806f;font-size:.85rem;margin-top:.2rem}
+.res-nivel{
+  font-family:'Poppins',sans-serif;font-weight:700;font-size:1.5rem;color:var(--lime);
+}
+.res-nivel-txt{color:#aab2a2;margin-top:.8rem;font-size:1rem}
+
+.res-perdida{
+  margin-top:1.8rem;padding:1.5rem;border-radius:var(--radius);text-align:center;
+  background:linear-gradient(160deg,rgba(197,237,27,.14),rgba(197,237,27,.04));
+  border:1px solid rgba(197,237,27,.28);
+}
+.res-perdida-lbl{
+  font-family:'Poppins',sans-serif;font-size:.76rem;letter-spacing:.14em;text-transform:uppercase;
+  color:#aab2a2;
+}
+.res-perdida-hs{font-family:'Poppins',sans-serif;font-size:1.15rem;color:#fff;margin-top:.6rem}
+.res-perdida-hs strong{font-size:3.2rem;font-weight:800;color:var(--lime);line-height:1;display:block}
+.res-perdida-ars{color:#e8ebe3;margin-top:.6rem;font-size:1.05rem}
+.res-perdida-ars strong{color:#fff}
+.res-perdida-fine{color:#8f978a;font-size:.82rem;margin-top:.8rem}
+
+.res-block{margin-top:2.4rem}
+.res-block h3{
+  font-size:1.15rem;letter-spacing:-.01em;
+  padding-bottom:.7rem;border-bottom:1px solid rgba(255,255,255,.1);margin-bottom:1.1rem;
+}
+
+.res-ops{display:grid;gap:.8rem}
+.res-op{
+  display:flex;gap:1rem;align-items:flex-start;
+  background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);
+  border-radius:14px;padding:1.1rem;transition:border-color .18s ease,transform .18s ease;
+}
+.res-op:hover{border-color:rgba(197,237,27,.5);transform:translateY(-2px)}
+.res-op-n{
+  flex:none;width:30px;height:30px;border-radius:50%;background:var(--grad);color:#0c1015;
+  font-family:'Poppins',sans-serif;font-weight:700;display:grid;place-content:center;font-size:.9rem;
+}
+.res-op-body{display:grid;gap:.35rem}
+.res-op-body strong{font-family:'Poppins',sans-serif;color:#fff;font-size:1.02rem}
+.res-op-hs{color:var(--lime);font-size:.85rem;font-weight:600}
+.res-op-que{color:#aab2a2;font-size:.93rem;line-height:1.5}
+.res-op-vacio{color:#aab2a2}
+
+.res-ia{
+  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);
+  border-radius:var(--radius);padding:1.4rem;
+}
+.res-ia h3{border-bottom-color:rgba(255,255,255,.12)}
+.res-ia-txt{color:#e8ebe3;white-space:pre-wrap;font-size:1rem;line-height:1.65}
+.res-ia-load{color:#8f978a;font-size:.9rem;display:flex;align-items:center;gap:.35rem}
+.res-ia-load span{
+  width:6px;height:6px;border-radius:50%;background:var(--lime);
+  animation:res-dot 1.2s infinite ease-in-out;
+}
+.res-ia-load span:nth-child(2){animation-delay:.15s}
+.res-ia-load span:nth-child(3){animation-delay:.3s;margin-right:.4rem}
+@keyframes res-dot{0%,60%,100%{opacity:.25}30%{opacity:1}}
+@media (prefers-reduced-motion:reduce){
+  .res-ia-load span{animation:none;opacity:.7}
+}
+
+.res-plan{list-style:none;display:grid;gap:1rem;counter-reset:fase}
+.res-plan li{
+  display:grid;gap:.35rem;padding-left:1.2rem;border-left:2px solid rgba(197,237,27,.45);
+}
+.res-plan strong{
+  font-family:'Poppins',sans-serif;color:var(--lime);font-size:.8rem;
+  letter-spacing:.12em;text-transform:uppercase;
+}
+.res-plan span{color:#aab2a2;line-height:1.55}
+
+.res-cta{
+  margin-top:2.6rem;padding:1.8rem 1.4rem;border-radius:var(--radius);text-align:center;
+  background:linear-gradient(160deg,rgba(255,255,255,.07),rgba(255,255,255,.02));
+  border:1px solid rgba(255,255,255,.12);
+}
+.res-cta-h{font-family:'Poppins',sans-serif;font-weight:700;font-size:1.35rem;color:#fff}
+.res-cta-p{color:#aab2a2;margin-top:.7rem;font-size:.98rem}
+
+@media (max-width:520px){
+  .quiz-main{padding-bottom:3rem}
+  .quiz-meta{gap:1.1rem}
+  .res-gauge{width:150px;height:150px}
+  .res-perdida-hs strong{font-size:2.7rem}
+}

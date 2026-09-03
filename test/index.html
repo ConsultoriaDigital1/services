@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex,nofollow" />
+  <title>Test de Automatización — Consultoría Digital</title>
+  <meta name="description" content="Descubrí en 2 minutos cuántas horas y cuánta plata perdés por hacer a mano lo que ya se puede automatizar." />
+  <link rel="icon" type="image/png" href="/assets/favicon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="/test/quiz.css" />
+</head>
+<body class="quiz-body">
+
+  <header class="quiz-header">
+    <a class="quiz-brand" href="/" aria-label="Consultoría Digital — inicio">
+      <img src="/assets/logo-white.svg" alt="Consultoría Digital" width="170" height="34" />
+    </a>
+  </header>
+
+  <main class="quiz-main">
+
+    <!-- ===== 1. Portada ===== -->
+    <section class="quiz-screen" id="pantalla-intro">
+      <span class="quiz-eyebrow">Diagnóstico de automatización</span>
+      <h1>¿Cuánto tiempo perdés haciendo <span class="grad-text">a mano</span> lo que ya se puede automatizar?</h1>
+      <p class="quiz-lead">
+        Conciliar, cargar facturas, responder WhatsApp, perseguir clientes que no volvieron.
+        Son horas que se van todas las semanas y no vuelven. Respondé 8 preguntas y te decimos
+        exactamente cuánto te está costando y qué automatizar primero.
+      </p>
+      <ul class="quiz-meta">
+        <li><strong>2</strong> minutos</li>
+        <li><strong>8</strong> preguntas</li>
+        <li><strong>1</strong> plan a medida</li>
+      </ul>
+      <button type="button" class="btn btn-block" id="btn-empezar">Empezar el test</button>
+      <p class="quiz-fineprint">Sin costo. El diagnóstico es tuyo, lo uses con nosotros o no.</p>
+    </section>
+
+    <!-- ===== 2. Preguntas ===== -->
+    <section class="quiz-screen" id="pantalla-preguntas" hidden>
+      <div class="quiz-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+        <span class="quiz-progress-bar" id="progreso"></span>
+      </div>
+      <p class="quiz-step" id="contador">Pregunta 1 de 8</p>
+      <h2 class="quiz-q" id="enunciado"></h2>
+      <div class="quiz-options" id="opciones"></div>
+      <button type="button" class="quiz-back" id="btn-volver">← Volver</button>
+    </section>
+
+    <!-- ===== 3. Datos ===== -->
+    <section class="quiz-screen" id="pantalla-datos" hidden>
+      <span class="quiz-eyebrow">Listo</span>
+      <h2>Tu diagnóstico está armado</h2>
+      <p class="quiz-lead">
+        Dejanos dónde encontrarte y lo ves ahora mismo. También te lo mandamos por escrito
+        junto con el plan de trabajo.
+      </p>
+      <form class="quiz-form" id="form-datos" novalidate>
+        <label>
+          <span>Tu nombre</span>
+          <input type="text" name="nombre" autocomplete="name" required placeholder="Gonzalo Romero" />
+        </label>
+        <label>
+          <span>WhatsApp</span>
+          <input type="tel" name="whatsapp" autocomplete="tel" required placeholder="379 4 725597" />
+        </label>
+        <label>
+          <span>Email</span>
+          <input type="email" name="email" autocomplete="email" required placeholder="vos@tuempresa.com" />
+        </label>
+        <label>
+          <span>Empresa y rubro</span>
+          <input type="text" name="empresa" autocomplete="organization" placeholder="Distribuidora del Norte — mayorista" />
+        </label>
+        <p class="quiz-error" id="error-datos" hidden></p>
+        <button type="submit" class="btn btn-block" id="btn-ver">Ver mi diagnóstico</button>
+        <p class="quiz-fineprint">Tus datos quedan solo con nosotros. No hacemos spam.</p>
+      </form>
+    </section>
+
+    <!-- ===== 4. Resultado ===== -->
+    <section class="quiz-screen" id="pantalla-resultado" hidden>
+
+      <div class="res-score">
+        <div class="res-gauge" id="gauge"><span id="score-num">0</span><small>/100</small></div>
+        <p class="res-nivel" id="nivel"></p>
+        <p class="res-nivel-txt" id="nivel-txt"></p>
+      </div>
+
+      <div class="res-perdida">
+        <p class="res-perdida-lbl">Hoy estás perdiendo, por mes</p>
+        <p class="res-perdida-hs"><strong id="horas">0</strong> horas</p>
+        <p class="res-perdida-ars">≈ <strong id="plata">$0</strong> en tiempo de trabajo</p>
+        <p class="res-perdida-fine" id="perdida-fine"></p>
+      </div>
+
+      <div class="res-block">
+        <h3>Lo que detectamos</h3>
+        <div class="res-ops" id="oportunidades"></div>
+      </div>
+
+      <div class="res-block res-ia" id="bloque-ia">
+        <h3>Tu lectura personalizada</h3>
+        <p class="res-ia-txt" id="ia-txt"></p>
+        <p class="res-ia-load" id="ia-load"><span></span><span></span><span></span> Analizando tus respuestas…</p>
+      </div>
+
+      <div class="res-block">
+        <h3>Cómo lo resolvemos, paso a paso</h3>
+        <ol class="res-plan" id="plan"></ol>
+      </div>
+
+      <div class="res-cta">
+        <p class="res-cta-h">Te armamos esto en 90 días</p>
+        <p class="res-cta-p">
+          Reservamos un diagnóstico sin cargo para quienes hicieron el test hoy. Escribinos y
+          arrancamos por lo que más te está costando.
+        </p>
+        <a class="btn btn-block" id="cta-wa" href="#" target="_blank" rel="noopener">Hablar por WhatsApp ahora</a>
+        <a class="btn btn-ghost btn-block" id="cta-mail" href="mailto:gonzalo@consultoriadigital.io">Escribir un email</a>
+        <p class="quiz-fineprint">Consultoría Digital · Parque Tecnológico Corrientes</p>
+      </div>
+
+    </section>
+
+  </main>
+
+  <script src="/test/quiz.js"></script>
+</body>
+</html>
