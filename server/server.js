@@ -104,7 +104,11 @@ app.post('/api/chat', limiteChat, async (req, res) => {
   const system = mode === 'diagnostico' ? diagnosticPrompt(lang) : systemPrompt(lang);
 
   const controller = new AbortController();
-  req.on('close', () => controller.abort());
+  // El 'close' de req salta al terminar de leer el body y cortaba el stream apenas arrancaba.
+  // Hay que escuchar el de res, y abortar solo si el cliente se fue antes de que terminara.
+  res.on('close', () => {
+    if (!res.writableEnded) controller.abort();
+  });
 
   let upstream;
   try {
