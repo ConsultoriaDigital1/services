@@ -5,15 +5,33 @@
 const TIMEOUT = 10000;
 const INTENTOS = 3;
 
-// Normaliza para wasender. Conservador a propósito: si no reconoce el formato,
-// devuelve solo los dígitos y que n8n decida (el número crudo también viaja).
+// Normaliza para wasender. La gente escribe el número de mil formas, así que en vez de
+// confiar en lo que vino lo desarmamos en partes y lo rearmamos. Conservador a propósito:
+// si no llegamos a un móvil argentino, devolvemos los dígitos y que n8n decida
+// (el número crudo también viaja en el payload).
 function normalizarWhatsapp(crudo) {
   let n = String(crudo || '').replace(/\D/g, '');
   if (!n) return '';
-  if (n.startsWith('54')) return n; // ya trae el código de país
-  n = n.replace(/^0+/, ''); // 0379... → 379...
-  n = n.replace(/^(\d{2,4})15(\d{6,8})$/, '$1$2'); // el 15 viejo de los celulares
-  return n.length === 10 ? '549' + n : n;
+
+  n = n.replace(/^00/, ''); // 0054... escrito a la europea
+
+  // El país se saca y se vuelve a poner al final: si nos quedábamos con el 54 de entrada,
+  // a quien escribe "+54 379 4725597" le faltaba el 9 y WhatsApp no lo entrega.
+  const tenia54 = n.startsWith('54');
+  if (tenia54) n = n.slice(2);
+
+  n = n.replace(/^0/, ''); // 0 de larga distancia: 0379...
+  if (n.length > 10 && n.startsWith('9')) n = n.slice(1); // 9 de celular
+
+  // El 15 viejo, pero solo si lo que queda es un móvil argentino de 10 dígitos: sin esa
+  // condición le come dígitos a números de otros países que traen un 15 en esa posición.
+  n = n.replace(/^(\d{2,4})15(\d{6,8})$/, (m, area, num) =>
+    (area + num).length === 10 ? area + num : m);
+
+  // Un móvil argentino son 10 dígitos: característica + número. Recién ahí lo armamos bien.
+  if (n.length === 10) return '549' + n;
+
+  return tenia54 ? '54' + n : n; // otro país, o número incompleto
 }
 
 function armarPayload(reg) {
@@ -23,7 +41,9 @@ function armarPayload(reg) {
     contacto: {
       nombre: reg.contacto.nombre,
       whatsapp: reg.contacto.whatsapp,
-      whatsapp_e164: reg.contacto.whatsappE164 || normalizarWhatsapp(reg.contacto.whatsapp),
+      // Se recalcula siempre, no se lee el guardado: así "Reenviar a n8n" repara los
+      // registros viejos que quedaron con un número mal normalizado.
+      whatsapp_e164: normalizarWhatsapp(reg.contacto.whatsapp),
       email: reg.contacto.email,
       empresa: reg.contacto.empresa,
     },
