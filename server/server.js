@@ -25,13 +25,15 @@ if (!API_KEY) {
 
 const app = express();
 app.set('trust proxy', 1); // detrás de nginx
-app.use(express.json({ limit: '64kb' }));
 app.use(
   cors({
     origin: (origin, cb) =>
       !origin || ORIGINS.includes(origin) ? cb(null, true) : cb(new Error('Origen no permitido')),
   })
 );
+
+app.use('/api', require('./brief').router);
+app.use(express.json({ limit: '64kb' }));
 
 // ---- Límite de uso por IP (protege el crédito de la API) ----
 const WINDOW_MS = 60 * 60 * 1000; // 1 hora
