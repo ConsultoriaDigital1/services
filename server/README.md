@@ -131,6 +131,17 @@ Muestra todos los tests, con buscador, filtros, detalle pregunta por pregunta y 
 **Backup**: todo vive en `server/data/tests.jsonl`, una línea JSON por evento. Copiarlo
 es todo el backup que hace falta.
 
+## 7. Inscripciones al Programa de Partners (/partners)
+
+`consultoriadigital.io/partners/` es la landing del encuentro de Partners TurnerIA. El
+formulario manda a `POST /api/partners` y se guarda en `server/data/partners.jsonl`
+(mismo formato que los tests). Si alguien se anota dos veces con el mismo correo se
+actualiza su inscripción en lugar de duplicarla. Límite: 30 envíos por IP por hora
+(`MAX_PARTNERS`).
+
+**Panel**: `https://consultoriadigital.io/admin/partners/` (misma contraseña que `/admin`),
+con buscador, filtro por perfil y export a CSV.
+
 ## Mantenimiento
 
 - **Qué sabe la IA**: `knowledge.js`. Si cambia un servicio en la web, actualizalo ahí también.

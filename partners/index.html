@@ -1,0 +1,341 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Programa de Partners TurnerIA · Encuentro del 23 de noviembre</title>
+<meta name="description" content="Encuentro virtual del Programa de Partners de TurnerIA. Lunes 23 de noviembre, 19:00. Inscripción gratuita.">
+<meta property="og:title" content="Programa de Partners TurnerIA">
+<meta property="og:description" content="Ganá con cada profesional médico, consultorio, clínica, sanatorio o estética que nos presentás. Encuentro virtual, lunes 23 de noviembre, 19:00.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://consultoriadigital.io/partners/">
+<meta property="og:image" content="https://consultoriadigital.io/partners/turneria.png">
+<link rel="icon" type="image/png" href="/assets/favicon.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=DM+Sans:wght@400;500;700&display=swap">
+<style>
+  :root {
+    --navy: #002941;
+    --lime: #D4F201;
+    --ink: #002941;
+    --body: #4A5F6D;
+    --muted: #6E8392;
+    --line: #DDE4E8;
+    --card: #FFFFFF;
+    --bg: #FAFBF9;
+    --soft: #F2F5F2;
+    --err: #B3261E;
+    --display: 'Space Grotesk', 'Trebuchet MS', sans-serif;
+    --text: 'DM Sans', Arial, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--text); line-height: 1.55; font-size: 16px; }
+  img { max-width: 100%; }
+  [hidden] { display: none !important; }
+
+  .wrap { max-width: 880px; margin: 0 auto; padding-left: 18px; padding-right: 18px; }
+
+  header .wrap { padding-top: 40px; padding-bottom: 34px; }
+  .mark { width: 215px; height: auto; display: block; margin-bottom: 28px; }
+
+  .eyebrow {
+    display: inline-block; background: var(--lime); color: #002941;
+    font-family: var(--display); font-size: 0.76rem; font-weight: 700;
+    letter-spacing: 0.17em; text-transform: uppercase;
+    padding: 7px 16px; border-radius: 999px; margin: 0 0 18px;
+  }
+  h1 {
+    font-family: var(--display); font-size: clamp(1.65rem, 4.6vw, 2.5rem);
+    font-weight: 600; line-height: 1.14; margin: 0 0 14px;
+    text-wrap: balance; color: var(--ink); max-width: 17em;
+  }
+  .lede { font-size: 1.08rem; color: var(--body); margin: 0 0 26px; max-width: 36em; }
+
+  .meta { display: flex; flex-wrap: wrap; gap: 12px; margin: 0; }
+  .meta div {
+    flex: 1 1 190px; min-width: 0; background: var(--card);
+    border: 1px solid var(--line); border-left: 4px solid var(--lime);
+    border-radius: 12px; padding: 15px 18px;
+  }
+  .meta dt { font-size: 0.7rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); font-weight: 700; margin-bottom: 2px; }
+  .meta dd { margin: 0; font-size: 1.04rem; font-weight: 600; color: var(--ink); }
+  .meta dd small { display: block; font-size: 0.85rem; font-weight: 400; color: var(--muted); }
+
+  main .wrap { padding-top: 10px; padding-bottom: 52px; }
+
+  h2 { font-family: var(--display); font-size: 1.28rem; font-weight: 600; margin: 30px 0 14px; color: var(--ink); }
+
+  .agenda { list-style: none; margin: 0 0 34px; padding: 0; display: grid; gap: 9px; }
+  .agenda li {
+    display: flex; gap: 13px; align-items: flex-start;
+    background: var(--card); border: 1px solid var(--line);
+    border-radius: 12px; padding: 14px 18px; color: var(--body);
+  }
+  .agenda .dot { flex: none; width: 9px; height: 9px; border-radius: 50%; background: var(--lime); margin-top: 0.55em; }
+  .agenda b { color: var(--ink); font-weight: 600; }
+
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 26px 22px; }
+  .card h2 { margin-top: 0; }
+
+  .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 15px; }
+  @media (max-width: 560px) { .grid { grid-template-columns: minmax(0, 1fr); } }
+  .full { grid-column: 1 / -1; }
+
+  label { display: block; font-size: 0.85rem; font-weight: 600; color: var(--ink); margin-bottom: 6px; }
+  label .opt { font-weight: 400; color: var(--muted); }
+
+  input, select {
+    width: 100%; font: inherit; font-size: 1rem; color: var(--ink);
+    background: var(--soft); border: 1px solid var(--line);
+    border-radius: 10px; padding: 11px 13px; min-height: 44px;
+  }
+  input:focus-visible, select:focus-visible, button:focus-visible, a:focus-visible { outline: 3px solid var(--lime); outline-offset: 2px; }
+  input[aria-invalid="true"], select[aria-invalid="true"] { border-color: var(--err); }
+
+  .err { display: block; font-size: 0.8rem; color: var(--err); margin-top: 5px; min-height: 1px; }
+
+  .actions { margin-top: 22px; display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+  button, .btn {
+    font: inherit; font-family: var(--display); font-weight: 700; font-size: 1rem;
+    border-radius: 999px; padding: 13px 28px; min-height: 48px; cursor: pointer;
+    border: 2px solid transparent; text-decoration: none; display: inline-flex; align-items: center;
+  }
+  .primary { background: var(--lime); color: #002941; }
+  .ghost { background: transparent; color: var(--ink); border-color: var(--line); }
+  button[disabled] { opacity: 0.55; cursor: progress; }
+  .note { font-size: 0.85rem; color: var(--muted); margin: 13px 0 0; }
+  .fallo { color: var(--err); font-size: 0.9rem; margin: 14px 0 0; }
+
+  .done .tick { width: 52px; height: 52px; border-radius: 50%; background: var(--lime); display: grid; place-items: center; margin-bottom: 15px; }
+  .done h2 { font-size: 1.45rem; margin-bottom: 8px; }
+  .done p { color: var(--body); margin: 0 0 18px; }
+  .recordar { background: var(--soft); border: 1px solid var(--line); border-radius: 12px; padding: 15px 18px; margin-bottom: 20px; }
+  .recordar b { color: var(--ink); }
+
+  footer { border-top: 1px solid var(--line); }
+  footer .wrap { padding-top: 22px; padding-bottom: 30px; font-size: 0.85rem; color: var(--muted); }
+  .pie { display: flex; flex-wrap: wrap; gap: 10px 24px; align-items: center; justify-content: space-between; }
+  .pie p { margin: 0; }
+  .porcd { display: flex; align-items: center; gap: 10px; }
+  .porcd img { width: 150px; height: auto; display: block; }
+
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; scroll-behavior: auto !important; } }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <img class="mark" src="/partners/turneria.png" alt="TurnerIA">
+    <p class="eyebrow">Encuentro virtual · Programa de Partners</p>
+    <h1>Ganá con cada profesional médico, consultorio, clínica, sanatorio o estética que nos presentás</h1>
+    <p class="lede">Una hora para conocer cómo funciona el programa, cuánto se cobra por cada uno y cómo sumarte sin poner un peso.</p>
+    <dl class="meta">
+      <div><dt>Fecha</dt><dd>Lunes 23 de noviembre<small>2026</small></dd></div>
+      <div><dt>Horario</dt><dd>19:00<small>Hora de Argentina</small></dd></div>
+      <div><dt>Modalidad</dt><dd>Virtual<small>El enlace llega por WhatsApp</small></dd></div>
+    </dl>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+    <h2>Qué vas a ver</h2>
+    <ul class="agenda">
+      <li><span class="dot"></span><span><b>Qué resuelve TurnerIA.</b> Demo en vivo del sistema de turnos, y cómo se conecta con el sistema que ya tienen.</span></li>
+      <li><span class="dot"></span><span><b>Las dos formas de sumarse.</b> Referido y Partner: qué hace cada uno y cuál conviene según tu caso.</span></li>
+      <li><span class="dot"></span><span><b>Cuánto se cobra.</b> Los números por cada incorporación, la proyección en el tiempo y cuándo se paga cada comisión.</span></li>
+      <li><span class="dot"></span><span><b>Las reglas del programa.</b> Cómo protegemos tu cartera y qué queda por escrito en el acuerdo.</span></li>
+      <li><span class="dot"></span><span><b>Preguntas.</b> Espacio abierto al final.</span></li>
+    </ul>
+
+    <section class="card" id="formCard">
+      <h2>Reservá tu lugar</h2>
+      <p class="note" style="margin: 0 0 20px">Completá tus datos y te enviamos el enlace por WhatsApp antes del encuentro.</p>
+
+      <form id="form" novalidate>
+
+        <div class="grid">
+          <div class="full">
+            <label for="nombre">Nombre y apellido</label>
+            <input id="nombre" name="nombre" type="text" autocomplete="name" required>
+            <span class="err" id="e-nombre"></span>
+          </div>
+          <div>
+            <label for="email">Correo electrónico</label>
+            <input id="email" name="email" type="email" autocomplete="email" inputmode="email" required>
+            <span class="err" id="e-email"></span>
+          </div>
+          <div>
+            <label for="tel">WhatsApp</label>
+            <input id="tel" name="tel" type="tel" autocomplete="tel" inputmode="tel" placeholder="Con característica" required>
+            <span class="err" id="e-tel"></span>
+          </div>
+          <div>
+            <label for="perfil">Tu perfil</label>
+            <select id="perfil" name="perfil" required>
+              <option value="">Elegí una opción</option>
+                <option>Visitador médico</option>
+                <option>Agencia de marketing médico</option>
+                <option>Proveedor del rubro salud</option>
+                <option>Consultora o estudio contable</option>
+                <option>Trabajo en un consultorio, clínica o centro de estética</option>
+                <option>Otro</option>
+            </select>
+            <span class="err" id="e-perfil"></span>
+          </div>
+          <div>
+            <label for="ciudad">Ciudad</label>
+            <input id="ciudad" name="ciudad" type="text" autocomplete="address-level2" required>
+            <span class="err" id="e-ciudad"></span>
+          </div>
+          <div>
+            <label for="empresa">Empresa <span class="opt">· opcional</span></label>
+            <input id="empresa" name="empresa" type="text" autocomplete="organization">
+            <span class="err"></span>
+          </div>
+          <div>
+            <label for="alcance">Profesionales o centros con los que tenés contacto <span class="opt">· opcional</span></label>
+            <select id="alcance" name="alcance">
+              <option value="">Prefiero no responder</option>
+              <option>Menos de 5</option>
+              <option>Entre 5 y 15</option>
+              <option>Entre 16 y 40</option>
+              <option>Más de 40</option>
+            </select>
+            <span class="err"></span>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button type="submit" class="primary" id="enviar">Reservar mi lugar</button>
+        </div>
+        <p class="fallo" id="fallo" hidden></p>
+        <p class="note">Usamos tus datos solo para enviarte el enlace del encuentro y la información del programa.</p>
+      </form>
+    </section>
+
+    <section class="card done" id="doneCard" hidden>
+      <div class="tick" aria-hidden="true">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#002941" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5.5 5.5L20 7"/></svg>
+      </div>
+      <h2>Tu lugar está reservado</h2>
+      <p>Antes del encuentro te mandamos el enlace por WhatsApp al número que nos dejaste.</p>
+      <div class="recordar">
+        <b>Lunes 23 de noviembre · 19:00</b><br>
+        Encuentro virtual del Programa de Partners TurnerIA. Dura alrededor de una hora.
+      </div>
+    </section>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap pie">
+    <p>TurnerIA · Asistente de turnos con inteligencia artificial</p>
+    <p class="porcd">
+      <span>Un producto de</span>
+      <img src="/partners/consultoria-digital.png" alt="Consultoría Digital">
+    </p>
+  </div>
+</footer>
+
+<script>
+(function () {
+  "use strict";
+
+  // Las inscripciones se guardan en la API del VPS y se ven en consultoriadigital.io/admin/partners/.
+  var API = window.CD_API || (["localhost", "127.0.0.1"].indexOf(location.hostname) >= 0
+    ? "http://localhost:3060"
+    : "https://api.consultoriadigital.io");
+
+  var form = document.getElementById("form");
+  var formCard = document.getElementById("formCard");
+  var doneCard = document.getElementById("doneCard");
+  var enviar = document.getElementById("enviar");
+  var fallo = document.getElementById("fallo");
+
+  var obligatorios = [
+    { id: "nombre", msg: "Escribí tu nombre y apellido." },
+    { id: "email", msg: "Escribí un correo válido." },
+    { id: "tel", msg: "Escribí tu número con característica." },
+    { id: "perfil", msg: "Elegí tu perfil." },
+    { id: "ciudad", msg: "Escribí tu ciudad." }
+  ];
+  var campos = ["nombre", "email", "tel", "perfil", "ciudad", "empresa", "alcance"];
+
+  function val(id) { return (document.getElementById(id).value || "").trim(); }
+
+  function setError(id, mensaje) {
+    var campo = document.getElementById(id);
+    var slot = document.getElementById("e-" + id);
+    if (slot) slot.textContent = mensaje || "";
+    if (mensaje) campo.setAttribute("aria-invalid", "true");
+    else campo.removeAttribute("aria-invalid");
+  }
+
+  function validEmail(v) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }
+  function validTel(v) { return v.replace(/[^0-9]/g, "").length >= 8; }
+
+  function revisar() {
+    var primero = null;
+    obligatorios.forEach(function (f) {
+      var v = val(f.id);
+      var mal = !v;
+      if (!mal && f.id === "email" && !validEmail(v)) mal = true;
+      if (!mal && f.id === "tel" && !validTel(v)) mal = true;
+      setError(f.id, mal ? f.msg : "");
+      if (mal && !primero) primero = f.id;
+    });
+    return primero;
+  }
+
+  obligatorios.forEach(function (f) {
+    var el = document.getElementById(f.id);
+    el.addEventListener("input", function () { setError(f.id, ""); });
+    el.addEventListener("change", function () { setError(f.id, ""); });
+  });
+
+  form.addEventListener("submit", function (ev) {
+    ev.preventDefault();
+    if (enviar.disabled) return; // un doble toque no manda dos veces
+    var mal = revisar();
+    if (mal) {
+      var el = document.getElementById(mal);
+      el.focus();
+      el.scrollIntoView({ block: "center", behavior: "smooth" });
+      return;
+    }
+
+    var datos = {};
+    campos.forEach(function (id) { datos[id] = val(id); });
+
+    fallo.hidden = true;
+    enviar.disabled = true;
+    enviar.textContent = "Reservando…";
+
+    fetch(API + "/api/partners", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(datos)
+    }).then(function (res) {
+      if (res.status === 429) throw new Error("Hubo demasiados intentos desde tu conexión. Probá de nuevo en un rato.");
+      if (res.status === 400) throw new Error("Revisá tus datos: alguno no quedó bien cargado.");
+      if (!res.ok) throw new Error("No pudimos guardar tu inscripción. Probá de nuevo en unos segundos.");
+      formCard.hidden = true;
+      doneCard.hidden = false;
+      doneCard.scrollIntoView({ block: "start", behavior: "smooth" });
+    }).catch(function (err) {
+      // fetch rechaza con TypeError cuando no hay red; cada navegador le pone otro texto.
+      fallo.textContent = err instanceof TypeError || !err.message
+        ? "No pudimos conectarnos. Revisá tu conexión y probá de nuevo."
+        : err.message;
+      fallo.hidden = false;
+    }).then(function () {
+      enviar.disabled = false;
+      enviar.textContent = "Reservar mi lugar";
+    });
+  });
+})();
+</script>
+</body>
+</html>

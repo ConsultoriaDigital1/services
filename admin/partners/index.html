@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex,nofollow" />
+  <title>Inscriptos Partners — Consultoría Digital</title>
+  <link rel="icon" type="image/png" href="/assets/favicon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="/admin/admin.css" />
+</head>
+<body class="adm-body">
+
+  <!-- ===== Login ===== -->
+  <section class="adm-login" id="pantalla-login" hidden>
+    <form class="adm-login-card" id="form-login" novalidate>
+      <img src="/assets/logo-cd.webp" alt="Consultoría Digital" width="190" height="40" />
+      <h1>Panel interno</h1>
+      <p class="adm-login-p">Inscriptos al Programa de Partners TurnerIA.</p>
+      <label>
+        <span>Contraseña</span>
+        <input type="password" id="password" autocomplete="current-password" required />
+      </label>
+      <p class="adm-error" id="error-login" hidden></p>
+      <button type="submit" class="btn btn-block" id="btn-entrar">Entrar</button>
+    </form>
+  </section>
+
+  <!-- ===== Panel ===== -->
+  <div id="pantalla-panel" hidden>
+
+    <header class="adm-header">
+      <a class="adm-brand" href="/" aria-label="Consultoría Digital — inicio">
+        <img src="/assets/logo-cd.webp" alt="Consultoría Digital" width="150" height="32" />
+      </a>
+      <div class="adm-header-acciones">
+        <a class="adm-btn" href="/admin/">Tests</a>
+        <a class="adm-btn" href="/admin/brief/">Briefs de clientes</a>
+        <a class="adm-btn" href="/partners/" target="_blank" rel="noopener">Ver formulario</a>
+        <button type="button" class="adm-btn" id="btn-actualizar">Actualizar</button>
+        <button type="button" class="adm-btn" id="btn-csv">Exportar CSV</button>
+        <button type="button" class="adm-btn adm-btn-salir" id="btn-salir">Salir</button>
+      </div>
+    </header>
+
+    <main class="adm-main">
+      <h1 class="adm-titulo">Inscriptos · Partners TurnerIA</h1>
+
+      <div class="adm-kpis" id="kpis"></div>
+
+      <div class="adm-filtros">
+        <input type="search" id="buscar" placeholder="Buscar por nombre, email, ciudad o empresa…" aria-label="Buscar" />
+        <select id="filtro-perfil" aria-label="Filtrar por perfil">
+          <option value="">Todos los perfiles</option>
+        </select>
+        <span class="adm-conteo" id="conteo"></span>
+      </div>
+
+      <p class="adm-aviso" id="aviso" hidden></p>
+
+      <div class="adm-tabla-wrap">
+        <table class="adm-tabla">
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Nombre</th>
+              <th>Contacto</th>
+              <th>Perfil</th>
+              <th>Ciudad</th>
+              <th>Empresa</th>
+              <th>Alcance</th>
+            </tr>
+          </thead>
+          <tbody id="filas"></tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+
+  <script src="/admin/partners/admin.js"></script>
+</body>
+</html>

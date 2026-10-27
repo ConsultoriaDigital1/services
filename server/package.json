@@ -6,7 +6,8 @@
   "private": true,
   "scripts": {
     "start": "node server.js",
-    "test:brief": "node --test brief.test.js"
+    "test:brief": "node --test brief.test.js",
+    "test:partners": "node --test partners.test.js"
   },
   "engines": {
     "node": ">=18"
