@@ -35,6 +35,8 @@ app.use(
 app.use('/api', require('./brief').router);
 const partners = require('./partners');
 app.use('/api', partners.router);
+const encuestas = require('./encuestas');
+app.use('/api', encuestas.router);
 app.use(express.json({ limit: '64kb' }));
 
 // ---- Límite de uso por IP (protege el crédito de la API) ----
@@ -367,6 +369,7 @@ app.get('/api/admin/tests.csv', auth.soloAdmin, (_req, res) => {
 const cargados = store.cargar();
 console.log(`${cargados} test(s) en ${store.ARCHIVO}`);
 console.log(`${partners.cargar()} inscripto(s) a partners en ${partners.ARCHIVO}`);
+console.log(`${encuestas.cargar()} respuesta(s) de encuestas en ${encuestas.ARCHIVO}`);
 if (!auth.activo) console.warn('Sin ADMIN_PASSWORD: el panel /admin queda deshabilitado');
 
 app.listen(PORT, () => console.log(`cd-chat-api escuchando en el puerto ${PORT}`));

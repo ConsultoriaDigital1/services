@@ -1,0 +1,21 @@
+/* Encuestas para clientes: sobre el tema oscuro del brief. */
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.enc-progreso{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:14px;padding:12px 0;background:var(--bg);font-size:.85rem;color:var(--muted)}
+.enc-progreso .pista{flex:1;height:6px;border-radius:99px;background:var(--line);overflow:hidden}
+.enc-progreso #barra{display:block;height:100%;width:0;background:var(--lime);transition:width .25s}
+.pregunta{border:0;padding:0;margin:0 0 30px}
+.pregunta:last-child{margin-bottom:0}
+.pregunta legend{font-weight:600;line-height:1.45;margin-bottom:6px}
+.pregunta legend b{color:var(--lime);margin-right:2px}
+.pregunta .ayuda{font-size:.88rem;margin:4px 0 10px}
+.opciones{display:grid;gap:8px;margin-top:10px}
+.opcion{display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:#0c1015;cursor:pointer;transition:border-color .15s,background .15s}
+.opcion:hover{border-color:#626b78}
+.opcion input{margin-top:4px;accent-color:var(--lime);flex:none}
+.opcion:has(input:checked){border-color:var(--lime);background:#151b0a}
+.otro{display:block;margin-top:8px}
+.otro textarea{width:100%;min-height:64px;padding:12px;border:1px solid #626b78;background:#0c1015;border-radius:9px;color:var(--ink)}
+.falta{color:#ff9b9b!important;font-size:.88rem}
+.pregunta.incompleta .opcion{border-color:#8a4a4a}
+#estado.error{color:#ff9b9b}
+.enc-aviso{border-color:var(--lime)}
