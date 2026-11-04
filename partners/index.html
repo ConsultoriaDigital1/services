@@ -65,6 +65,40 @@
 
   h2 { font-family: var(--display); font-size: 1.28rem; font-weight: 600; margin: 30px 0 14px; color: var(--ink); }
 
+  .paraquien { padding: 34px 0 18px; }
+  .paraquien .kicker {
+    font-family: var(--display); font-size: 0.76rem; font-weight: 700; letter-spacing: 0.17em;
+    text-transform: uppercase; color: var(--muted); margin: 0 0 10px;
+  }
+  .paraquien h2 {
+    font-size: clamp(1.9rem, 5.6vw, 3rem); font-weight: 700; line-height: 1.08;
+    margin: 0 0 22px; text-wrap: balance; max-width: 16em;
+  }
+  .paraquien h2 mark { background: linear-gradient(transparent 58%, var(--lime) 58%); color: inherit; padding: 0 2px; }
+  .importante {
+    background: var(--navy); color: #fff; border-radius: 16px;
+    padding: 20px 22px; margin: 0 0 20px;
+  }
+  .importante b {
+    display: inline-block; background: var(--lime); color: var(--navy);
+    font-family: var(--display); font-size: 0.72rem; letter-spacing: 0.16em; text-transform: uppercase;
+    padding: 4px 11px; border-radius: 999px; margin-bottom: 9px;
+  }
+  .importante p { margin: 0; font-size: 1.06rem; }
+  .importante p + p { margin-top: 4px; color: #C9D6DE; }
+  .perfiles { list-style: none; margin: 0 0 22px; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+  @media (max-width: 720px) { .perfiles { grid-template-columns: minmax(0, 1fr); } }
+  .perfiles li { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 22px 20px; }
+  .perfiles .ico { width: 48px; height: 48px; border-radius: 14px; background: var(--lime); display: grid; place-items: center; margin-bottom: 14px; }
+  .perfiles h3 { font-family: var(--display); font-size: 1.1rem; font-weight: 600; line-height: 1.25; margin: 0 0 8px; color: var(--ink); }
+  .perfiles p { margin: 0; color: var(--body); font-size: 0.95rem; }
+  .cierre {
+    display: flex; flex-wrap: wrap; gap: 14px 22px; align-items: center; justify-content: space-between;
+    background: var(--soft); border: 1px solid var(--line); border-left: 4px solid var(--lime);
+    border-radius: 12px; padding: 18px 20px; margin-bottom: 18px;
+  }
+  .cierre p { margin: 0; flex: 1 1 320px; font-weight: 600; color: var(--ink); font-size: 1.04rem; }
+
   .agenda { list-style: none; margin: 0 0 34px; padding: 0; display: grid; gap: 9px; }
   .agenda li {
     display: flex; gap: 13px; align-items: flex-start;
@@ -140,6 +174,46 @@
 
 <main>
   <div class="wrap">
+    <section class="paraquien" aria-labelledby="paraquien-t">
+      <p class="kicker">¿Para quién es este programa?</p>
+      <h2 id="paraquien-t">Si ya tenés la confianza de las clínicas, <mark>este programa es para vos.</mark></h2>
+
+      <div class="importante">
+        <b>Importante</b>
+        <p>No hace falta que sepas de marketing ni de tecnología.</p>
+        <p>Lo único que importa es que ya tengas relación con clínicas y consultorios.</p>
+      </div>
+
+      <ul class="perfiles">
+        <li>
+          <span class="ico" aria-hidden="true">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#002941" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.1-7-11.5a7 7 0 0 1 14 0C19 14.9 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
+          </span>
+          <h3>Recorrés clínicas todas las semanas</h3>
+          <p>Visitadores médicos, proveedores de insumos, representantes de equipamiento.</p>
+        </li>
+        <li>
+          <span class="ico" aria-hidden="true">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#002941" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>
+          </span>
+          <h3>Conocés los números de la clínica por dentro</h3>
+          <p>Contadores y asesores que ya acompañan a médicos y directores.</p>
+        </li>
+        <li>
+          <span class="ico" aria-hidden="true">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#002941" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M3 13h18"/></svg>
+          </span>
+          <h3>Tenés una cartera de clínicas que ya te contrata</h3>
+          <p>Agencias de marketing médico y consultoras que quieren sumar un servicio sin armarlo desde cero.</p>
+        </li>
+      </ul>
+
+      <div class="cierre">
+        <p>Si tu nombre ya pesa en una clínica, recomendarnos te lleva un mensaje. Sumate como partner completando el formulario.</p>
+        <a class="btn primary" href="#formCard">Quiero ser partner</a>
+      </div>
+    </section>
+
     <h2>Qué vas a ver</h2>
     <ul class="agenda">
       <li><span class="dot"></span><span><b>Qué resuelve TurnerIA.</b> Demo en vivo del sistema de turnos, y cómo se conecta con el sistema que ya tienen.</span></li>
