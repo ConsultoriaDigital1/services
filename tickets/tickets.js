@@ -1,7 +1,7 @@
 // ===== Tickets de clientes (/tickets) =====
 // 1) el cliente busca su proyecto, 2) pone el código que le pasamos, 3) carga pedidos con
 // archivos y ve cuáles ya marcamos como hechos. El acceso queda guardado en su navegador.
-const { API, esc, fecha, adjuntos, activarAdjuntos, revisarArchivos, subir, MAX_ARCHIVOS } = window.TK;
+const { API, esc, fecha, adjuntos, activarAdjuntos, revisarArchivos, subir, reproductor, grabador, MAX_ARCHIVOS } = window.TK;
 const $ = s => document.querySelector(s);
 const CLAVE_ACCESOS = 'cd_tickets_accesos';
 const CLAVE_ULTIMO = 'cd_tickets_ultimo';
@@ -19,7 +19,9 @@ function guardarAcceso(id, token) {
 let proyecto = null; // { id, nombre }
 let tickets = [];
 let nuevos = []; // archivos elegidos para el pedido nuevo
+const ondasGrabadas = new WeakMap(); // audio grabado → su onda, para la vista previa
 const token = () => tokenDe(proyecto?.id);
+const avance = (i, n, f, pct) => `Subiendo ${n > 1 ? `${i} de ${n} ` : ''}(${f.name}) · ${pct}%`;
 
 function mostrar(paso) {
   for (const id of ['paso-buscar', 'paso-codigo', 'paso-proyecto']) $('#' + id).hidden = id !== paso;
@@ -131,42 +133,64 @@ function pintar() {
         <p class="tk-meta">${t.autor ? `${esc(t.autor)} · ` : ''}${esc(fecha(t.creado))}${t.hecho && t.hechoEn ? ` · hecho el ${esc(fecha(t.hechoEn))}` : ''}</p>
         ${t.nota ? `<p class="tk-nota"><b>Respuesta del equipo:</b> ${esc(t.nota)}</p>` : ''}
         ${adjuntos(t.archivos, `/api/tickets/p/${proyecto.id}/tickets/${t.id}/archivos/`)}
-        ${!t.hecho && t.archivos.length < MAX_ARCHIVOS ? `<label class="secondary tk-agregar">+ Agregar archivos<input type="file" multiple data-agregar="${esc(t.id)}" hidden></label><span class="tk-agregar-estado" role="status"></span>` : ''}
+        ${!t.hecho && t.archivos.length < MAX_ARCHIVOS ? `<div class="tk-sumar"><label class="secondary tk-agregar">+ Agregar archivos<input type="file" multiple data-agregar="${esc(t.id)}" hidden></label><div data-grabar="${esc(t.id)}"></div></div><p class="tk-agregar-estado" role="status"></p>` : ''}
       </div>
     </li>`).join('');
   activarAdjuntos($('#tickets'), token);
+  // Un audio grabado sobre un pedido que ya existe se sube apenas se termina de grabar.
+  for (const caja of $('#tickets').querySelectorAll('[data-grabar]')) {
+    grabador(caja, { alTerminar: archivo => sumarArchivos(caja.dataset.grabar, [archivo], caja.closest('.tk-cuerpo').querySelector('.tk-agregar-estado')) });
+  }
+}
+
+async function sumarArchivos(id, lista, estado) {
+  const t = tickets.find(x => x.id === id);
+  const problema = revisarArchivos(lista, t.archivos.length);
+  if (problema) { estado.textContent = problema; return; }
+  try {
+    await subir(lista, `/api/tickets/p/${proyecto.id}/tickets/${t.id}/archivos`, token, (...a) => { estado.textContent = avance(...a); });
+    await cargar(); pintar();
+  } catch (err) {
+    estado.textContent = err.message;
+    if (err.subidos?.length) { await cargar().catch(() => {}); pintar(); }
+  }
 }
 
 // Agregar archivos a un pedido que ya existe.
 $('#tickets').addEventListener('change', async e => {
   const input = e.target.closest('[data-agregar]');
   if (!input) return;
-  const t = tickets.find(x => x.id === input.dataset.agregar);
-  const estado = input.closest('.tk-cuerpo').querySelector('.tk-agregar-estado');
   const lista = [...input.files];
   input.value = '';
-  const problema = revisarArchivos(lista, t.archivos.length);
-  if (problema) { estado.textContent = problema; return; }
-  try {
-    await subir(lista, `/api/tickets/p/${proyecto.id}/tickets/${t.id}/archivos`, token, (i, n) => { estado.textContent = `Subiendo ${i} de ${n}…`; });
-    await cargar(); pintar();
-  } catch (err) {
-    estado.textContent = err.message;
-    if (err.subidos?.length) { await cargar().catch(() => {}); pintar(); }
-  }
+  await sumarArchivos(input.dataset.agregar, lista, input.closest('.tk-cuerpo').querySelector('.tk-agregar-estado'));
 });
 
 // ---------- Pedido nuevo ----------
+const vistas = []; // objectURLs de la vista previa, para liberarlos al repintar
 function pintarNuevos() {
-  $('#lista-archivos').innerHTML = nuevos.map((f, i) => `<li><span>${esc(f.name)} · ${TK.peso(f.size)}</span><button type="button" class="secondary" data-quitar="${i}" aria-label="Quitar ${esc(f.name)}">Quitar</button></li>`).join('');
+  vistas.splice(0).forEach(u => URL.revokeObjectURL(u));
+  $('#lista-archivos').innerHTML = nuevos.map((f, i) => `<li>${f.type.startsWith('audio/') ? `<div data-vista="${i}"></div>` : `<span>${esc(f.name)} · ${TK.peso(f.size)}</span>`}<button type="button" class="secondary" data-quitar="${i}" aria-label="Quitar ${esc(f.name)}">Quitar</button></li>`).join('');
+  for (const caja of $('#lista-archivos').querySelectorAll('[data-vista]')) {
+    const f = nuevos[Number(caja.dataset.vista)];
+    const u = URL.createObjectURL(f);
+    vistas.push(u);
+    reproductor(caja, u, ondasGrabadas.get(f));
+  }
 }
-$('#archivos').onchange = e => {
-  const lista = [...nuevos, ...e.target.files];
-  e.target.value = '';
+function sumarNuevos(agregados) {
+  const lista = [...nuevos, ...agregados];
   const problema = revisarArchivos(lista);
   $('#archivos-error').textContent = problema || '';
   if (!problema) { nuevos = lista; pintarNuevos(); }
+}
+$('#archivos').onchange = e => {
+  const lista = [...e.target.files];
+  e.target.value = '';
+  sumarNuevos(lista);
 };
+grabador($('#grabador'), {
+  alTerminar: (archivo, onda) => { ondasGrabadas.set(archivo, onda); sumarNuevos([archivo]); },
+});
 $('#lista-archivos').onclick = e => {
   const b = e.target.closest('[data-quitar]');
   if (b) { nuevos.splice(Number(b.dataset.quitar), 1); pintarNuevos(); }
@@ -191,7 +215,7 @@ $('#form-ticket').onsubmit = async e => {
     $('#titulo').value = ''; $('#detalle').value = '';
     const lista = nuevos; nuevos = []; pintarNuevos();
     try {
-      if (lista.length) await subir(lista, `/api/tickets/p/${proyecto.id}/tickets/${ticket.id}/archivos`, token, (i, n) => { estado.textContent = `Subiendo archivo ${i} de ${n}…`; });
+      if (lista.length) await subir(lista, `/api/tickets/p/${proyecto.id}/tickets/${ticket.id}/archivos`, token, (...a) => { estado.textContent = avance(...a); });
       estado.textContent = '¡Listo! Tu pedido quedó cargado.';
     } catch (err) {
       estado.className = 'tk-error';

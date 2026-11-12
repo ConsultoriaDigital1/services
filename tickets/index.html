@@ -52,8 +52,9 @@
           <label class="field wide"><span>Detalle</span><textarea id="detalle" maxlength="6000" placeholder="Contanos dónde, cómo y cualquier dato que nos ayude."></textarea></label>
           <label class="field"><span>Tu nombre</span><input id="autor" maxlength="120" autocomplete="name"></label>
         </div>
-        <label class="upload">Imágenes o archivos (opcional)<input id="archivos" type="file" multiple></label>
-        <p class="tk-ayuda">Hasta 10 archivos de 10 MB cada uno. Para videos pesados, pegá un enlace en el detalle.</p>
+        <label class="upload">Imágenes, archivos o audio (opcional)<input id="archivos" type="file" multiple></label>
+        <div id="grabador"></div>
+        <p class="tk-ayuda">Hasta 10 archivos de 50 MB cada uno. También podés grabar un audio explicando el pedido.</p>
         <ul id="lista-archivos" class="tk-archivos-nuevos"></ul>
         <p id="archivos-error" class="tk-error" role="alert"></p>
         <button class="btn" id="btn-enviar">Cargar pedido</button>

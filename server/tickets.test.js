@@ -1,5 +1,6 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
+const crypto = require('node:crypto');
 const fs = require('node:fs/promises');
 const path = require('node:path');
 
@@ -56,6 +57,28 @@ test('tickets: proyectos con código, pedidos con archivos y checklist del admin
     assert.equal(html.nombre, '.._.._x.html');
     assert.equal((await subir(Buffer.alloc(0), 'vacio.txt')).status, 400);
 
+    // Archivo grande en partes: un reintento de una parte ya recibida no la duplica y una
+    // parte salteada se rechaza.
+    const subida = crypto.randomUUID();
+    const audio = Buffer.concat([Buffer.from([0x1a, 0x45, 0xdf, 0xa3]), crypto.randomBytes(25)]);
+    const trozos = [audio.subarray(0, 10), audio.subarray(10, 20), audio.subarray(20)];
+    const parte = (i, cuerpo = trozos[i]) => fetch(`${base}/tickets/p/${proyecto.id}/tickets/${ticket.id}/archivos?nombre=audio-nota.webm&subida=${subida}&parte=${i}&partes=3&total=${audio.length}`, { method: 'POST', headers: { Authorization: cliente.Authorization, 'Content-Type': 'application/octet-stream' }, body: cuerpo });
+    assert.equal((await parte(0)).status, 202);
+    assert.equal((await parte(0)).status, 202);
+    assert.equal((await parte(2)).status, 409);
+    assert.equal((await parte(1)).status, 202);
+    const nota = await (await parte(2)).json();
+    assert.equal(nota.tipo, 'audio/webm');
+    assert.equal(nota.size, audio.length);
+    const oida = await fetch(`${base}/tickets/p/${proyecto.id}/tickets/${ticket.id}/archivos/${nota.id}`, { headers: cliente });
+    assert.match(oida.headers.get('content-disposition'), /^inline/);
+    assert.deepEqual(Buffer.from(await oida.arrayBuffer()), audio);
+    // Más que el máximo no se acepta, aunque venga en partes chicas.
+    const enorme = await fetch(`${base}/tickets/p/${proyecto.id}/tickets/${ticket.id}/archivos?nombre=x.bin&subida=${crypto.randomUUID()}&parte=0&partes=20&total=${tickets.MAX_BYTES + 1}`, { method: 'POST', headers: { Authorization: cliente.Authorization }, body: Buffer.alloc(10) });
+    assert.equal(enorme.status, 413);
+    assert.equal(tickets.tipoReal(audio, 'video-obra.webm'), 'video/webm');
+    assert.equal(tickets.tipoReal(Buffer.from('ID3\x04\x00'), 'tema.mp3'), 'audio/mpeg');
+
     const descarga = await fetch(`${base}/tickets/p/${proyecto.id}/tickets/${ticket.id}/archivos/${html.id}`, { headers: cliente });
     assert.equal(descarga.status, 200);
     assert.match(descarga.headers.get('content-disposition'), /^attachment/);
@@ -70,7 +93,7 @@ test('tickets: proyectos con código, pedidos con archivos y checklist del admin
     const vista = await (await fetch(`${base}/tickets/p/${proyecto.id}`, { headers: cliente })).json();
     assert.equal(vista.tickets.length, 1);
     assert.equal(vista.tickets[0].nota, 'Listo, ya está online');
-    assert.equal(vista.tickets[0].archivos.length, 2);
+    assert.equal(vista.tickets[0].archivos.length, 3);
     assert.equal(vista.proyecto.codigo, undefined);
 
     // Persistencia: lo que se recarga del archivo es lo último que se escribió.

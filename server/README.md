@@ -158,10 +158,18 @@ pendiente y lo hecho.
    se eliminan pedidos, se regenera el código (corta los accesos viejos) o se archiva el proyecto.
 
 Datos: `server/data/tickets.jsonl` (proyectos y pedidos, mismo formato append-only) y los
-archivos en `server/data/tickets/<pedido>/`. Archivos de hasta 10 MB (`TICKETS_MAX_MB`) y 10
-por pedido; se suben de a uno, así que nginx necesita `client_max_body_size` de al menos `11m`
-(el brief ya pide más). Límites por IP y por hora: 20 intentos de código
-(`MAX_TICKETS_ACCESOS`), 300 búsquedas y 200 cargas.
+archivos en `server/data/tickets/<pedido>/`. Archivos de hasta 50 MB (`TICKETS_MAX_MB`) y 10
+por pedido. El navegador los manda en partes de 4 MB porque Traefik (v3) corta la lectura de
+cada pedido a los 60 segundos: así un archivo grande desde una conexión lenta igual llega, y
+si se corta una parte se reintenta solo esa. Si algún día hay un proxy delante con límite de
+tamaño, alcanza con `6m` por pedido.
+
+El cliente también puede **grabar audios** desde la página (botón "Grabar audio", con la onda
+en vivo mientras habla). Se guardan como un archivo más y se escuchan con un reproductor con
+onda, tanto del lado del cliente como en el panel.
+
+Límites por IP y por hora: 20 intentos de código (`MAX_TICKETS_ACCESOS`), 300 búsquedas y
+1500 partes subidas (`MAX_TICKETS_CARGAS`).
 
 ## Mantenimiento
 

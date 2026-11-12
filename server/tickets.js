@@ -19,8 +19,11 @@ const ARCHIVO = path.join(DIR, 'tickets.jsonl');
 const ADJUNTOS = path.join(DIR, 'tickets');
 const UUID = /^[a-f0-9-]{36}$/;
 const MB = 1024 * 1024;
-const MAX_BYTES = (Number(process.env.TICKETS_MAX_MB) || 10) * MB;
+const MAX_BYTES = (Number(process.env.TICKETS_MAX_MB) || 50) * MB;
 const MAX_ARCHIVOS = 10; // por ticket
+// Los archivos llegan en partes: Traefik corta la lectura de cada pedido al minuto, y un
+// archivo de 50 MB desde una conexión lenta no entra en un solo pedido.
+const PARTE_BYTES = 5 * MB;
 const VIGENCIA_MS = 30 * 24 * 60 * 60 * 1000; // el cliente entra una vez al mes
 
 // Sin secreto propio se deriva del panel; si tampoco hay contraseña, uno al azar por
@@ -103,14 +106,23 @@ function soloCliente(req, res, next) {
 }
 
 // ---- Archivos ----
-// Las imágenes se reconocen por sus primeros bytes (no por lo que dice el navegador) para
-// poder mostrarlas en el panel. Todo lo demás se guarda y se descarga como binario.
-function tipoReal(bytes) {
+// Imágenes, audios, videos y PDF se reconocen por sus primeros bytes (no por lo que dice
+// el navegador) para poder mostrarlos o reproducirlos. Todo lo demás se descarga como binario.
+// WebM y MP4 sirven tanto para audio como para video: decide el nombre del archivo
+// (las notas de voz grabadas en la página se llaman "audio-…").
+function tipoReal(bytes, nombre = '') {
+  const ascii = (desde, hasta) => bytes.toString('ascii', desde, hasta);
+  const esAudio = /^audio|\.(weba|m4a|aac)$/i.test(nombre);
   if (bytes.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]))) return 'image/png';
   if (bytes[0] === 255 && bytes[1] === 216 && bytes[2] === 255) return 'image/jpeg';
-  if (bytes.toString('ascii', 0, 4) === 'RIFF' && bytes.toString('ascii', 8, 12) === 'WEBP') return 'image/webp';
-  if (bytes.toString('ascii', 0, 6) === 'GIF87a' || bytes.toString('ascii', 0, 6) === 'GIF89a') return 'image/gif';
-  if (bytes.toString('ascii', 0, 5) === '%PDF-') return 'application/pdf';
+  if (ascii(0, 4) === 'RIFF' && ascii(8, 12) === 'WEBP') return 'image/webp';
+  if (ascii(0, 6) === 'GIF87a' || ascii(0, 6) === 'GIF89a') return 'image/gif';
+  if (ascii(0, 5) === '%PDF-') return 'application/pdf';
+  if (bytes.subarray(0, 4).equals(Buffer.from([0x1a, 0x45, 0xdf, 0xa3]))) return esAudio ? 'audio/webm' : 'video/webm';
+  if (ascii(4, 8) === 'ftyp') return esAudio || ascii(8, 12) === 'M4A ' ? 'audio/mp4' : 'video/mp4';
+  if (ascii(0, 4) === 'OggS') return 'audio/ogg';
+  if (ascii(0, 4) === 'RIFF' && ascii(8, 12) === 'WAVE') return 'audio/wav';
+  if (ascii(0, 3) === 'ID3' || (bytes[0] === 255 && (bytes[1] & 0xe0) === 0xe0)) return 'audio/mpeg';
   return 'application/octet-stream';
 }
 const nombreSeguro = v => String(v || 'archivo').replace(/[\x00-\x1f<>:"/\\|?*]/g, '_').trim().slice(0, 160) || 'archivo';
@@ -119,7 +131,7 @@ async function enviarArchivo(res, ticket, archivoId) {
   const archivo = ticket?.archivos.find(a => a.id === archivoId);
   if (!archivo) return res.sendStatus(404);
   res.set({ 'X-Content-Type-Options': 'nosniff', 'Content-Security-Policy': "default-src 'none'; sandbox" });
-  // Solo imágenes y PDF se abren en el navegador; el resto siempre se descarga.
+  // Imágenes, audio, video y PDF se abren en el navegador; el resto siempre se descarga.
   const inline = archivo.tipo !== 'application/octet-stream';
   res.type(archivo.tipo);
   res.attachment(archivo.nombre);
@@ -163,7 +175,8 @@ function crearLimite(max) {
 }
 const limiteBusqueda = crearLimite(Number(process.env.MAX_TICKETS_BUSQUEDAS) || 300);
 const limiteAcceso = crearLimite(Number(process.env.MAX_TICKETS_ACCESOS) || 20);
-const limiteCarga = crearLimite(Number(process.env.MAX_TICKETS_CARGAS) || 200);
+// Cada parte de 5 MB cuenta: 10 archivos de 50 MB son ~100 pedidos.
+const limiteCarga = crearLimite(Number(process.env.MAX_TICKETS_CARGAS) || 1500);
 
 const router = express.Router();
 router.use((_req, res, next) => {
@@ -171,7 +184,7 @@ router.use((_req, res, next) => {
   next();
 });
 const json = express.json({ limit: '64kb' });
-const binario = express.raw({ type: () => true, limit: MAX_BYTES });
+const binario = express.raw({ type: () => true, limit: PARTE_BYTES + 64 * 1024 });
 
 // ===================== Cliente =====================
 
@@ -231,34 +244,117 @@ router.post('/tickets/p/:proyecto/tickets', soloCliente, limiteCarga, json, asyn
   res.status(201).json(ticketPublico(ticket));
 });
 
-// Un archivo por pedido, en crudo (sin base64): así cada subida es chica y si una falla
-// se reintenta sola, sin volver a mandar las demás.
+// Subidas en curso: `${ticket}:${subida}` → estado. Las partes se escriben en orden a un
+// archivo temporal; con la última se reconoce el tipo y el archivo pasa al ticket.
+const subidas = new Map();
+setInterval(() => {
+  for (const [clave, s] of subidas) {
+    if (Date.now() - s.tocado < 3600000) continue; // abandonada hace más de una hora
+    subidas.delete(clave);
+    fsp.rm(s.temp, { force: true }).catch(() => {});
+  }
+}, 600000).unref();
+
+const entero = (v, defecto) => (/^\d{1,12}$/.test(String(v ?? '')) ? Number(v) : defecto);
+
+async function cabecera(archivo) {
+  const fh = await fsp.open(archivo, 'r');
+  try {
+    const { buffer, bytesRead } = await fh.read(Buffer.alloc(64), 0, 64, 0);
+    return buffer.subarray(0, bytesRead);
+  } finally {
+    await fh.close();
+  }
+}
+
+// Un archivo por subida, en crudo (sin base64) y en partes de hasta 5 MB. Si una parte se
+// corta, el navegador la reintenta sola; una parte que ya llegó se confirma sin escribirla
+// de nuevo. Un archivo chico es simplemente una subida de una sola parte.
 router.post('/tickets/p/:proyecto/tickets/:id/archivos', soloCliente, limiteCarga, binario, async (req, res) => {
   const ticket = tickets.get(req.params.id);
   if (!ticket || ticket.borrado || ticket.proyecto !== req.proyecto.id) return res.status(404).json({ error: 'no_encontrado' });
-  if (ticket.archivos.length >= MAX_ARCHIVOS) return res.status(400).json({ error: 'demasiados_archivos' });
   const bytes = Buffer.isBuffer(req.body) ? req.body : Buffer.alloc(0);
   if (!bytes.length) return res.status(400).json({ error: 'archivo_vacio' });
 
-  const archivo = {
-    id: crypto.randomUUID(),
-    nombre: nombreSeguro(req.query.nombre),
-    tipo: tipoReal(bytes),
-    size: bytes.length,
-    creado: new Date().toISOString(),
-  };
+  const partes = entero(req.query.partes, 1);
+  const parte = entero(req.query.parte, 0);
+  const total = entero(req.query.total, bytes.length);
+  if (total > MAX_BYTES) return res.status(413).json({ error: 'archivo_muy_grande' });
+  if (partes < 1 || partes > Math.ceil(MAX_BYTES / MB) || parte >= partes) return res.status(400).json({ error: 'parte_invalida' });
+  const clave = UUID.test(req.query.subida || '') ? `${ticket.id}:${req.query.subida}` : null;
+  if (partes > 1 && !clave) return res.status(400).json({ error: 'parte_invalida' });
+
+  let s = clave && subidas.get(clave);
+  if (!s && parte === 0) {
+    if (ticket.archivos.length >= MAX_ARCHIVOS) return res.status(400).json({ error: 'demasiados_archivos' });
+    s = {
+      nombre: nombreSeguro(req.query.nombre),
+      total,
+      partes,
+      siguiente: 0,
+      recibido: 0,
+      temp: path.join(ADJUNTOS, ticket.id, `.subiendo-${crypto.randomUUID()}`),
+      cola: Promise.resolve(),
+      tocado: Date.now(),
+    };
+    try {
+      await fsp.mkdir(path.join(ADJUNTOS, ticket.id), { recursive: true });
+    } catch (err) {
+      console.error('No se pudo crear la carpeta del ticket:', err.message);
+      return res.status(500).json({ error: 'no_guardado' });
+    }
+    if (clave) subidas.set(clave, s);
+  }
+  if (!s) return res.status(409).json({ error: 'subida_perdida' }); // p. ej. se reinició el servidor
+  if (parte < s.siguiente) return res.status(202).json({ parte }); // reintento de algo que ya llegó
+  if (parte !== s.siguiente || partes !== s.partes || total !== s.total || s.recibido + bytes.length > s.total) {
+    return res.status(409).json({ error: 'parte_fuera_de_orden' });
+  }
+
+  // Se reserva el lugar antes de escribir y las escrituras van en fila: un reintento que
+  // llegue mientras tanto no duplica ni desordena nada.
+  s.siguiente++;
+  s.recibido += bytes.length;
+  s.tocado = Date.now();
+  const escrito = (s.cola = s.cola.then(() => fsp.appendFile(s.temp, bytes)));
   try {
-    await fsp.mkdir(path.join(ADJUNTOS, ticket.id), { recursive: true });
-    await fsp.writeFile(path.join(ADJUNTOS, ticket.id, archivo.id), bytes, { flag: 'wx' });
-    // Se relee el ticket: otra subida en paralelo pudo haberlo actualizado mientras tanto.
-    const actual = tickets.get(ticket.id);
-    await guardar({ ...actual, archivos: [...actual.archivos, archivo] });
+    await escrito;
   } catch (err) {
-    console.error('No se pudo guardar el archivo:', err.message);
+    console.error('No se pudo guardar una parte:', err.message);
+    if (clave) subidas.delete(clave);
+    await fsp.rm(s.temp, { force: true }).catch(() => {});
     return res.status(500).json({ error: 'no_guardado' });
   }
-  const { id, nombre, tipo, size } = archivo;
-  res.status(201).json({ id, nombre, tipo, size });
+  if (s.siguiente < s.partes) return res.status(202).json({ parte });
+
+  if (clave) subidas.delete(clave);
+  if (s.recibido !== s.total) {
+    await fsp.rm(s.temp, { force: true }).catch(() => {});
+    return res.status(400).json({ error: 'archivo_incompleto' });
+  }
+  try {
+    // Se relee el ticket: otra subida en paralelo pudo haberlo actualizado mientras tanto.
+    const actual = tickets.get(ticket.id);
+    if (actual.archivos.length >= MAX_ARCHIVOS) {
+      await fsp.rm(s.temp, { force: true });
+      return res.status(400).json({ error: 'demasiados_archivos' });
+    }
+    const archivo = {
+      id: crypto.randomUUID(),
+      nombre: s.nombre,
+      tipo: tipoReal(await cabecera(s.temp), s.nombre),
+      size: s.recibido,
+      creado: new Date().toISOString(),
+    };
+    await fsp.rename(s.temp, path.join(ADJUNTOS, ticket.id, archivo.id));
+    await guardar({ ...tickets.get(ticket.id), archivos: [...tickets.get(ticket.id).archivos, archivo] });
+    const { id, nombre, tipo, size } = archivo;
+    res.status(201).json({ id, nombre, tipo, size });
+  } catch (err) {
+    console.error('No se pudo guardar el archivo:', err.message);
+    await fsp.rm(s.temp, { force: true }).catch(() => {});
+    res.status(500).json({ error: 'no_guardado' });
+  }
 });
 
 router.get('/tickets/p/:proyecto/tickets/:id/archivos/:archivo', soloCliente, (req, res) => {
@@ -336,4 +432,4 @@ router.use((err, _req, res, _next) => {
   res.status(status).json({ error: status === 413 ? 'archivo_muy_grande' : 'no_procesado' });
 });
 
-module.exports = { router, cargar, validarAcceso, emitirAcceso, tipoReal, ARCHIVO, MAX_BYTES, MAX_ARCHIVOS };
+module.exports = { router, cargar, validarAcceso, emitirAcceso, tipoReal, ARCHIVO, MAX_BYTES, MAX_ARCHIVOS, PARTE_BYTES };
