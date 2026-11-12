@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Tickets — Consultoría Digital</title>
+  <link rel="icon" href="../assets/favicon.png">
+  <link rel="stylesheet" href="../styles.css"><link rel="stylesheet" href="../brief/brief.css"><link rel="stylesheet" href="./tickets.css">
+</head>
+<body>
+  <header class="brief-header"><a href="../"><img src="../assets/logo-cd.webp" width="190" alt="Consultoría Digital"></a><span>Pedidos y seguimiento de tu proyecto</span></header>
+  <main class="brief-main">
+
+    <!-- 1. Elegir el proyecto -->
+    <section id="paso-buscar" hidden>
+      <p class="eyebrow">TICKETS</p><h1>Pedidos de <span>tu proyecto.</span></h1>
+      <p class="lead">Cargá cambios, correcciones o materiales para tu proyecto y seguí cuáles ya están hechos.</p>
+      <div class="card">
+        <label class="field" for="buscar"><span>Buscá tu proyecto</span></label>
+        <input class="search" id="buscar" type="search" placeholder="Escribí el nombre del proyecto o de tu empresa…" autocomplete="off" maxlength="80" aria-describedby="buscar-ayuda" aria-controls="resultados">
+        <p id="buscar-ayuda">Escribí al menos 2 letras.</p>
+        <ul id="resultados" class="tk-resultados" aria-live="polite"></ul>
+      </div>
+    </section>
+
+    <!-- 2. Código de acceso -->
+    <section id="paso-codigo" hidden>
+      <p class="eyebrow">TICKETS</p><h1 id="codigo-titulo"></h1>
+      <form id="form-codigo" class="card">
+        <label class="field"><span>Código de acceso</span>
+          <input id="codigo" class="tk-codigo" autocomplete="one-time-code" autocapitalize="characters" spellcheck="false" maxlength="12" required>
+        </label>
+        <p>Es el código de 6 caracteres que te pasó el equipo de Consultoría Digital. Si no lo tenés, pedilo por WhatsApp.</p>
+        <button class="btn" id="btn-entrar">Entrar</button>
+        <button type="button" class="secondary" id="otro-proyecto">Elegir otro proyecto</button>
+        <p id="codigo-estado" role="status" aria-live="polite"></p>
+      </form>
+    </section>
+
+    <!-- 3. Checklist del proyecto -->
+    <section id="paso-proyecto" hidden>
+      <div class="tk-cabecera">
+        <div><p class="eyebrow">TICKETS</p><h1 id="proyecto-nombre"></h1></div>
+        <button type="button" class="secondary" id="salir">Cambiar de proyecto</button>
+      </div>
+      <div class="tk-avance"><span class="pista"><span id="barra"></span></span><span id="avance-txt"></span></div>
+
+      <form id="form-ticket" class="card">
+        <h2>Nuevo pedido</h2>
+        <div class="fields">
+          <label class="field wide"><span>¿Qué necesitás? *</span><input id="titulo" maxlength="200" required placeholder="Ej.: Cambiar la foto de portada de la página de inicio"></label>
+          <label class="field wide"><span>Detalle</span><textarea id="detalle" maxlength="6000" placeholder="Contanos dónde, cómo y cualquier dato que nos ayude."></textarea></label>
+          <label class="field"><span>Tu nombre</span><input id="autor" maxlength="120" autocomplete="name"></label>
+        </div>
+        <label class="upload">Imágenes o archivos (opcional)<input id="archivos" type="file" multiple></label>
+        <p class="tk-ayuda">Hasta 10 archivos de 10 MB cada uno. Para videos pesados, pegá un enlace en el detalle.</p>
+        <ul id="lista-archivos" class="tk-archivos-nuevos"></ul>
+        <p id="archivos-error" class="tk-error" role="alert"></p>
+        <button class="btn" id="btn-enviar">Cargar pedido</button>
+        <p id="ticket-estado" role="status" aria-live="polite"></p>
+      </form>
+
+      <h2 class="tk-subtitulo">Checklist</h2>
+      <p id="lista-estado" role="status"></p>
+      <ul id="tickets" class="tk-lista"></ul>
+    </section>
+
+    <noscript>Activá JavaScript para usar los tickets.</noscript>
+  </main>
+  <script src="./comun.js"></script><script src="./tickets.js"></script>
+</body>
+</html>

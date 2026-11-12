@@ -142,6 +142,27 @@ actualiza su inscripción en lugar de duplicarla. Límite: 30 envíos por IP por
 **Panel**: `https://consultoriadigital.io/admin/partners/` (misma contraseña que `/admin`),
 con buscador, filtro por perfil y export a CSV.
 
+## 8. Tickets de clientes (/tickets)
+
+`consultoriadigital.io/tickets/` es donde cada cliente carga pedidos para su proyecto
+(cambios, correcciones, materiales) con imágenes o archivos, y ve un checklist con lo
+pendiente y lo hecho.
+
+1. En `https://consultoriadigital.io/admin/tickets/` (misma contraseña que `/admin`) se crea
+   el proyecto. Se genera un **código de acceso** de 6 caracteres.
+2. Con **Copiar mensaje para el cliente** queda listo el WhatsApp con el link directo
+   (`/tickets/?p=<id>`) y el código.
+3. El cliente también puede entrar a `/tickets/`, buscar el proyecto por su nombre o el de
+   la empresa (mínimo 2 letras) y poner el código. Queda recordado 30 días en su navegador.
+4. Desde el panel se marcan los pedidos como hechos, se deja una nota que el cliente ve,
+   se eliminan pedidos, se regenera el código (corta los accesos viejos) o se archiva el proyecto.
+
+Datos: `server/data/tickets.jsonl` (proyectos y pedidos, mismo formato append-only) y los
+archivos en `server/data/tickets/<pedido>/`. Archivos de hasta 10 MB (`TICKETS_MAX_MB`) y 10
+por pedido; se suben de a uno, así que nginx necesita `client_max_body_size` de al menos `11m`
+(el brief ya pide más). Límites por IP y por hora: 20 intentos de código
+(`MAX_TICKETS_ACCESOS`), 300 búsquedas y 200 cargas.
+
 ## Mantenimiento
 
 - **Qué sabe la IA**: `knowledge.js`. Si cambia un servicio en la web, actualizalo ahí también.
